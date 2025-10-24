@@ -1,0 +1,57 @@
+// Colores de la marca
+$brand-red: #DC2626 !default;
+$brand-yellow: #FCD34D !default;
+$brand-black: #000000 !default;
+$brand-white: #ffffff !default;
+
+// Colores de fondo
+$background-dark: #0a0a0a !default;
+$background-card: rgba(0, 0, 0, 0.6) !default;
+$background-gradient-start: rgba(25, 25, 25, 0.95) !default;
+$background-gradient-middle: rgba(35, 35, 35, 0.9) !default;
+$background-gradient-end: rgba(30, 30, 30, 0.95) !default;
+
+// Colores de gradientes
+$golden-gradient: linear-gradient(145deg, 
+  rgba(252, 211, 77, 0.2) 0%, 
+  rgba(245, 158, 11, 0.1) 50%, 
+  rgba(217, 119, 6, 0.15) 100%) !default;
+
+$red-gradient: linear-gradient(145deg, 
+  rgba(220, 38, 38, 0.2) 0%, 
+  rgba(185, 28, 28, 0.1) 50%, 
+  rgba(153, 27, 27, 0.15) 100%) !default;
+
+// Sombras
+$shadow-golden: 0 0 30px rgba(252, 211, 77, 0.4) !default;
+$shadow-red: 0 0 30px rgba(220, 38, 38, 0.4) !default;
+$shadow-card: 0 8px 32px rgba(0, 0, 0, 0.3) !default;
+
+// Tipografía
+$font-primary: 'Orbitron', monospace !default;
+$font-secondary: 'Rajdhani', sans-serif !default;
+
+// Espaciado
+$spacing-xs: 0.5rem !default;
+$spacing-sm: 1rem !default;
+$spacing-md: 1.5rem !default;
+$spacing-lg: 2rem !default;
+$spacing-xl: 3rem !default;
+$spacing-xxl: 4rem !default;
+
+// Breakpoints
+$mobile: 480px !default;
+$tablet: 768px !default;
+$desktop: 1024px !default;
+$large-desktop: 1200px !default;
+
+// Transiciones
+$transition-fast: 0.2s ease !default;
+$transition-normal: 0.3s ease !default;
+$transition-slow: 0.5s ease !default;
+
+// Border radius
+$radius-sm: 8px !default;
+$radius-md: 12px !default;
+$radius-lg: 16px !default;
+$radius-xl: 20px !default;

@@ -1,0 +1,47 @@
+<!-- Section Selector -->
+<div class="container">
+  <div class="section-selector">
+    <div class="section-card urban-card" (click)="navigateToSection('cercos')">
+      <div class="card-content">
+        <div class="icon-container">
+          <svg class="section-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 21V3H21V21H3Z" stroke="currentColor" stroke-width="2"/>
+            <path d="M9 3V21" stroke="currentColor" stroke-width="2"/>
+            <path d="M15 3V21" stroke="currentColor" stroke-width="2"/>
+            <path d="M3 9H21" stroke="currentColor" stroke-width="2"/>
+            <path d="M3 15H21" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </div>
+        <h3>Cercos Perimetrales</h3>
+        <p>Cercos para ciudad, residencias y espacios urbanos</p>
+        <div class="card-features">
+          <span class="feature">• Cercos metálicos</span>
+          <span class="feature">• Instalación profesional</span>
+          <span class="feature">• Diseños modernos</span>
+        </div>
+        <button class="cta-button">Explorar Cercos</button>
+      </div>
+    </div>
+
+    <div class="section-card rural-card" (click)="navigateToSection('rurales')">
+      <div class="card-content">
+        <div class="icon-container">
+          <svg class="section-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="currentColor" stroke-width="2"/>
+            <path d="M2 7L12 12" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 12L22 7" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 12V22" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </div>
+        <h3>Artículos Rurales</h3>
+        <p>Todo lo que necesitas para el campo y actividades rurales</p>
+        <div class="card-features">
+          <span class="feature">• Herramientas agrícolas</span>
+          <span class="feature">• Equipamiento rural</span>
+          <span class="feature">• Accesorios de campo</span>
+        </div>
+        <button class="cta-button">Ver Artículos</button>
+      </div>
+    </div>
+  </div>
+</div>

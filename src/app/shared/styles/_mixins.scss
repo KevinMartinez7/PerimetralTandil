@@ -1,0 +1,98 @@
+// Mixins para efectos y componentes reutilizables
+@use "sass:color";
+
+@mixin card-base {
+  background: $background-card;
+  border-radius: $radius-md;
+  border: 1px solid rgba($brand-yellow, 0.2);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+  transition: all $transition-normal;
+  box-shadow: $shadow-card;
+}
+
+@mixin golden-glow {
+  box-shadow: $shadow-golden;
+  border-color: $brand-yellow;
+}
+
+@mixin red-glow {
+  box-shadow: $shadow-red;
+  border-color: $brand-red;
+}
+
+@mixin responsive-text($mobile-size, $desktop-size) {
+  font-size: $mobile-size;
+  
+  @media (min-width: $tablet) {
+    font-size: $desktop-size;
+  }
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin absolute-full {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+@mixin gradient-text($gradient) {
+  background: $gradient;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@mixin button-base {
+  padding: $spacing-sm $spacing-lg;
+  border: none;
+  border-radius: $radius-lg;
+  font-family: $font-primary;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all $transition-normal;
+  
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+@mixin golden-button {
+  @include button-base;
+  // Usar color.adjust en lugar de darken/lighten
+  background: linear-gradient(135deg, $brand-yellow, color.adjust($brand-yellow, $lightness: -10%));
+  color: $brand-black;
+  
+  &:hover {
+    background: linear-gradient(135deg, color.adjust($brand-yellow, $lightness: 5%), $brand-yellow);
+    box-shadow: $shadow-golden;
+  }
+}
+
+@mixin red-button {
+  @include button-base;
+  // Usar color.adjust en lugar de darken/lighten
+  background: linear-gradient(135deg, $brand-red, color.adjust($brand-red, $lightness: -10%));
+  color: $brand-white;
+  
+  &:hover {
+    background: linear-gradient(135deg, color.adjust($brand-red, $lightness: 5%), $brand-red);
+    box-shadow: $shadow-red;
+  }
+}
