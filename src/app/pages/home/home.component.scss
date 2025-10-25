@@ -18,6 +18,39 @@
   padding: 0 1rem;
 }
 
+// WhatsApp Floating Button
+.whatsapp-float {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 60px;
+  height: 60px;
+  background: #25D366;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  
+  svg {
+    width: 32px;
+    height: 32px;
+    color: white;
+  }
+  
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
 // Media Queries para responsive design
 @media (max-width: 768px) {
   .container {
@@ -26,5 +59,17 @@
   
   .main-content {
     padding: 1rem 0;
+  }
+  
+  .whatsapp-float {
+    bottom: 1rem;
+    right: 1rem;
+    width: 50px;
+    height: 50px;
+    
+    svg {
+      width: 28px;
+      height: 28px;
+    }
   }
 }
