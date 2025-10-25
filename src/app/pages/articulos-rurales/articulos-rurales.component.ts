@@ -115,14 +115,14 @@ export class ArticulosRuralesComponent implements OnInit {
   }
 
   contactarPorArticulo(articulo: ArticuloRural) {
-    const mensaje = `Hola! Me interesa el producto: ${articulo.nombre}`;
+    const mensaje = `¡Hola Perimetral Tandil! Me interesa el producto: ${articulo.nombre}. ¿Podrían darme más información?`;
     const enlaceWhatsApp = `https://wa.me/5492494567890?text=${encodeURIComponent(mensaje)}`;
     window.open(enlaceWhatsApp, '_blank');
   }
 
   verDetalleArticulo(articulo: ArticuloRural) {
-    // Aquí se podría implementar un modal o navegación a detalle
-    console.log('Ver detalle de:', articulo.nombre);
+    // Navegar a la página de detalle del artículo
+    this.router.navigate(['/articulos-rurales/detalle', articulo.id]);
   }
 
   getCategoriaNombre(categoriaId: string): string {
