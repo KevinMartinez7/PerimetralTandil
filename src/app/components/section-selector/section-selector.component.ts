@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Output, EventEmitter } from '@angular/core';
 
 @Component({
   selector: 'app-section-selector',
@@ -8,8 +8,10 @@ import { Component } from '@angular/core';
 })
 export class SectionSelectorComponent {
   
+  @Output() sectionSelected = new EventEmitter<string>();
+  
   navigateToSection(section: string) {
     console.log(`Navegando a sección: ${section}`);
-    // Aquí se implementará la navegación cuando se configure el routing
+    this.sectionSelected.emit(section);
   }
 }

@@ -19,7 +19,7 @@
           <span class="feature">• Instalación profesional</span>
           <span class="feature">• Diseños modernos</span>
         </div>
-        <button class="cta-button">Explorar Cercos</button>
+        <button class="cta-button" (click)="navigateToSection('cercos'); $event.stopPropagation()">Explorar Cercos</button>
       </div>
     </div>
 
@@ -40,7 +40,7 @@
           <span class="feature">• Equipamiento rural</span>
           <span class="feature">• Accesorios de campo</span>
         </div>
-        <button class="cta-button">Ver Artículos</button>
+        <button class="cta-button" (click)="navigateToSection('rurales'); $event.stopPropagation()">Ver Artículos</button>
       </div>
     </div>
   </div>

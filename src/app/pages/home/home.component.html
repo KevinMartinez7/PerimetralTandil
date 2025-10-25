@@ -1,0 +1,21 @@
+<div class="home-container">
+  <!-- Header Component -->
+  <app-header></app-header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="container">
+      <!-- Hero Component -->
+      <app-hero></app-hero>
+
+      <!-- Section Selector Component -->
+      <app-section-selector (sectionSelected)="navigateToSection($event)"></app-section-selector>
+
+      <!-- Company Info Component -->
+      <app-company-info></app-company-info>
+    </div>
+  </main>
+
+  <!-- Footer Component -->
+  <app-footer></app-footer>
+</div>
