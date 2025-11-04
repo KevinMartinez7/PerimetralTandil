@@ -1,0 +1,270 @@
+<!-- Detalle de Cerco Perimetral -->
+<div class="cerco-detalle-container" *ngIf="cerco">
+  <div class="container">
+    
+    <!-- Botón de volver -->
+    <div class="back-button-container">
+      <button (click)="goBack()" class="back-button">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Volver a Cercos Perimetrales
+      </button>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="detalle-content">
+      
+      <!-- Sección izquierda - Carrusel de imágenes -->
+      <div class="imagen-section">
+        <div class="carrusel-container">
+          <!-- Imagen principal -->
+          <div class="imagen-principal">
+            <img 
+              [src]="imagenesCarrusel[imagenActualIndex]" 
+              [alt]="cerco.nombre"
+              (click)="abrirImagenAmpliada(imagenesCarrusel[imagenActualIndex])"
+              style="cursor: pointer;"
+              onerror="this.src='/imagenes/placeholder-cerco.jpg'"
+            >
+            
+            <!-- Botones de navegación -->
+            <button class="nav-button prev" (click)="anteriorImagen()" [disabled]="imagenesCarrusel.length <= 1">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            
+            <button class="nav-button next" (click)="siguienteImagen()" [disabled]="imagenesCarrusel.length <= 1">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            
+            <!-- Badge de oferta -->
+            <div *ngIf="cerco.enOferta" class="offer-badge">¡OFERTA ESPECIAL!</div>
+          </div>
+          
+          <!-- Thumbnails -->
+          <div class="thumbnails" *ngIf="imagenesCarrusel.length > 1">
+            <button 
+              *ngFor="let imagen of imagenesCarrusel; let i = index"
+              (click)="irAImagen(i)"
+              class="thumbnail"
+              [class.active]="i === imagenActualIndex"
+            >
+              <img [src]="imagen" [alt]="'Vista ' + (i + 1)" onerror="this.src='/imagenes/placeholder-cerco.jpg'">
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección derecha - Información del producto -->
+      <div class="info-section">
+        <div class="producto-header">
+          <div class="breadcrumb">
+            <a routerLink="/" class="breadcrumb-link">Inicio</a>
+            <span class="breadcrumb-separator">></span>
+            <a routerLink="/cercos-perimetrales" class="breadcrumb-link">Cercos Perimetrales</a>
+            <span class="breadcrumb-separator">></span>
+            <span class="breadcrumb-current">{{ cerco.nombre }}</span>
+          </div>
+          
+          <h1 class="producto-titulo">{{ cerco.nombre }}</h1>
+          
+          <div class="producto-meta">
+            <span class="categoria-badge">{{ cerco.categoria }}</span>
+            <span class="marca-badge">{{ cerco.marca }}</span>
+            <span class="stock-badge" [class.low-stock]="cerco.stock <= 5">
+              Stock: {{ cerco.stock }} unidades
+            </span>
+          </div>
+        </div>
+
+        <!-- Precio -->
+        <div class="precio-section">
+          <div *ngIf="cerco.enOferta && cerco.precioOriginal" class="precio-oferta">
+            <span class="precio-original">{{ formatearPrecio(cerco.precioOriginal) }}</span>
+            <span class="descuento-badge">
+              {{ ((cerco.precioOriginal - cerco.precio) / cerco.precioOriginal * 100).toFixed(0) }}% OFF
+            </span>
+          </div>
+          <div class="precio-actual" [class.precio-especial]="cerco.enOferta">
+            {{ formatearPrecio(cerco.precio) }}
+          </div>
+          <p class="precio-nota">* Precios sujetos a cambios sin previo aviso</p>
+        </div>
+
+        <!-- Descripción -->
+        <div class="descripcion-section">
+          <h3>Descripción</h3>
+          <p>{{ cerco.descripcion }}</p>
+        </div>
+
+        <!-- Características -->
+        <div class="caracteristicas-section">
+          <h3>Características Principales</h3>
+          <ul class="caracteristicas-lista">
+            <li *ngFor="let caracteristica of cerco.caracteristicas">
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              {{ caracteristica }}
+            </li>
+          </ul>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="acciones-section">
+          <button (click)="contactarPorWhatsApp()" class="btn-principal">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 11.5C21.0034 12.8199 20.6951 14.1219 20.1 15.3C19.3944 16.7118 18.3098 17.8992 16.9674 18.7293C15.6251 19.5594 14.0782 19.9994 12.5 20C11.1801 20.0035 9.87812 19.6951 8.7 19.1L3 21L4.9 15.3C4.30493 14.1219 3.99656 12.8199 4 11.5C4.00061 9.92179 4.44061 8.37488 5.27072 7.03258C6.10083 5.69028 7.28825 4.60561 8.7 3.90003C9.87812 3.30496 11.1801 2.99659 12.5 3.00003H13C15.0843 3.11502 17.053 3.99479 18.5291 5.47086C20.0052 6.94693 20.885 8.91568 21 11V11.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Solicitar Cotización
+          </button>
+          
+          <button (click)="preguntar()" class="btn-secundario">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+              <path d="M12 1V3M12 21V23M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M1 12H3M21 12H23M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            Hacer Consulta
+          </button>
+        </div>
+
+        <!-- Información adicional -->
+        <div class="info-adicional">
+          <div class="info-item">
+            <svg class="info-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22 16.92V19.92C22.0011 20.1985 21.9441 20.4741 21.8325 20.7293C21.7209 20.9845 21.5573 21.2136 21.3521 21.4019C21.1468 21.5901 20.9046 21.7335 20.6407 21.8227C20.3769 21.9119 20.0974 21.9451 19.82 21.92C16.7428 21.5856 13.787 20.5341 11.19 18.85C8.77382 17.3147 6.72533 15.2662 5.19 12.85C3.49998 10.2412 2.44818 7.27099 2.12 4.17999C2.09501 3.90347 2.12788 3.62476 2.21649 3.36162C2.3051 3.09849 2.44748 2.85669 2.63512 2.65162C2.82276 2.44655 3.05056 2.28271 3.30507 2.17052C3.55958 2.05833 3.83416 2.00026 4.11 1.99999H7.11C7.59531 1.99538 8.06579 2.16708 8.43376 2.48353C8.80173 2.79999 9.04207 3.23945 9.11 3.71999C9.23662 4.68007 9.47144 5.62273 9.81 6.52999C9.94454 6.88792 9.9736 7.27691 9.89384 7.65088C9.81408 8.02485 9.6288 8.36811 9.36 8.63999L8.09 9.90999C9.51355 12.4135 11.5865 14.4864 14.09 15.91L15.36 14.64C15.6319 14.3712 15.9751 14.1859 16.3491 14.1061C16.7231 14.0264 17.1121 14.0555 17.47 14.19C18.3773 14.5286 19.3199 14.7634 20.28 14.89C20.7658 14.9585 21.2094 15.2032 21.5265 15.5775C21.8437 15.9518 22.0122 16.4296 22 16.92Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div>
+              <strong>Teléfono:</strong>
+              <span>2494316864</span>
+            </div>
+          </div>
+          
+          <div class="info-item">
+            <svg class="info-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 10C20 16 12 22 12 22S4 16 4 10C4 7.87827 4.84285 5.84344 6.34315 4.34315C7.84344 2.84285 9.87827 2 12 2C14.1217 2 16.1566 2.84285 17.6569 4.34315C19.1571 5.84344 20 7.87827 20 10Z" stroke="currentColor" stroke-width="2"/>
+              <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <div>
+              <strong>Ubicación:</strong>
+              <span>Magallanes 1250, Tandil</span>
+            </div>
+          </div>
+          
+          <div class="info-item">
+            <svg class="info-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="2"/>
+              <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <div>
+              <strong>Email:</strong>
+              <span>perimetralalambrados@gmail.com</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de formulario de WhatsApp -->
+  <div *ngIf="mostrarFormularioWhatsApp" class="modal-overlay" (click)="cerrarFormulario()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Solicitar Información</h3>
+        <button (click)="cerrarFormulario()" class="modal-close">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      
+      <form class="contact-form">
+        <div class="form-group">
+          <label for="nombre">Nombre completo *</label>
+          <input 
+            type="text" 
+            id="nombre"
+            [(ngModel)]="formularioContacto.nombre"
+            name="nombre"
+            [class.error]="erroresValidacion.nombre"
+            placeholder="Tu nombre completo"
+          >
+          <span *ngIf="erroresValidacion.nombre" class="error-message">{{ erroresValidacion.nombre }}</span>
+        </div>
+
+        <div class="form-group">
+          <label for="telefono">Teléfono *</label>
+          <input 
+            type="tel" 
+            id="telefono"
+            [(ngModel)]="formularioContacto.telefono"
+            name="telefono"
+            [class.error]="erroresValidacion.telefono"
+            placeholder="Tu número de teléfono"
+          >
+          <span *ngIf="erroresValidacion.telefono" class="error-message">{{ erroresValidacion.telefono }}</span>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email *</label>
+          <input 
+            type="email" 
+            id="email"
+            [(ngModel)]="formularioContacto.email"
+            name="email"
+            [class.error]="erroresValidacion.email"
+            placeholder="tu.email@ejemplo.com"
+          >
+          <span *ngIf="erroresValidacion.email" class="error-message">{{ erroresValidacion.email }}</span>
+        </div>
+
+        <div class="form-group">
+          <label for="comentario">Consulta o comentario *</label>
+          <textarea 
+            id="comentario"
+            [(ngModel)]="formularioContacto.comentario"
+            name="comentario"
+            [class.error]="erroresValidacion.comentario"
+            placeholder="Cuéntanos qué necesitas, medidas, características especiales, etc."
+            rows="4"
+          ></textarea>
+          <span *ngIf="erroresValidacion.comentario" class="error-message">{{ erroresValidacion.comentario }}</span>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" (click)="cerrarFormulario()" class="btn-cancelar">Cancelar</button>
+          <button type="button" (click)="enviarConsultaWhatsApp()" class="btn-enviar">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 11.5C21.0034 12.8199 20.6951 14.1219 20.1 15.3C19.3944 16.7118 18.3098 17.8992 16.9674 18.7293C15.6251 19.5594 14.0782 19.9994 12.5 20C11.1801 20.0035 9.87812 19.6951 8.7 19.1L3 21L4.9 15.3C4.30493 14.1219 3.99656 12.8199 4 11.5C4.00061 9.92179 4.44061 8.37488 5.27072 7.03258C6.10083 5.69028 7.28825 4.60561 8.7 3.90003C9.87812 3.30496 11.1801 2.99659 12.5 3.00003H13C15.0843 3.11502 17.053 3.99479 18.5291 5.47086C20.0052 6.94693 20.885 8.91568 21 11V11.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Enviar por WhatsApp
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de imagen ampliada -->
+  <div *ngIf="mostrarImagenAmpliada" class="lightbox-overlay" (click)="cerrarImagenAmpliada()">
+    <button class="lightbox-close" (click)="cerrarImagenAmpliada()">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <div class="lightbox-content" (click)="$event.stopPropagation()">
+      <img [src]="imagenAmpliadaUrl" [alt]="cerco.nombre" class="lightbox-imagen">
+    </div>
+  </div>
+</div>
+
+<!-- Estado de carga -->
+<div *ngIf="!cerco" class="loading-container">
+  <div class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Cargando información del cerco...</p>
+  </div>
+</div>

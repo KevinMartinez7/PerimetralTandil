@@ -1,0 +1,285 @@
+<!-- Cercos Perimetrales Page -->
+<div class="cercos-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="container">
+      <div class="header-content">
+        <h1 class="page-title">Cercos Perimetrales</h1>
+        <p class="page-subtitle">Soluciones profesionales para seguridad y estética urbana</p>
+        
+        <!-- Navegación de migas -->
+        <nav class="breadcrumb">
+          <a routerLink="/" class="breadcrumb-link">Inicio</a>
+          <span class="breadcrumb-separator">></span>
+          <span class="breadcrumb-current">Cercos Perimetrales</span>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido principal -->
+  <div class="container">
+    <div class="content-wrapper">
+      
+      <!-- Botón de volver al inicio -->
+      <div class="back-button-container">
+        <button 
+          class="back-button" 
+          (click)="goBack()" 
+          type="button"
+          id="btnVolver">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Volver al Inicio
+        </button>
+      </div>
+      
+      <!-- Barra de herramientas -->
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <!-- Barra de búsqueda -->
+          <div class="search-container">
+            <input 
+              type="text" 
+              [(ngModel)]="textoBusqueda" 
+              (keyup.enter)="aplicarFiltros()"
+              placeholder="Buscar cercos..."
+              class="search-input"
+            >
+            <button (click)="aplicarFiltros()" class="search-button">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" stroke-width="2"/>
+              </svg>
+            </button>
+          </div>
+          
+          <!-- Botón de filtros -->
+          <button (click)="toggleFiltros()" class="filter-toggle" [class.active]="mostrarFiltros">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 6H20M7 12H17M10 18H14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Filtros
+          </button>
+        </div>
+        
+        <div class="toolbar-right">
+          <!-- Contador de resultados -->
+          <span class="results-count">{{ resumenFiltros }}</span>
+          
+          <!-- Selector de vista -->
+          <div class="view-selector">
+            <button 
+              (click)="cambiarVista('grid')" 
+              [class.active]="vistaActual === 'grid'"
+              class="view-button"
+              title="Vista en cuadrícula"
+            >
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="3" width="7" height="7" stroke="currentColor" stroke-width="2"/>
+                <rect x="14" y="3" width="7" height="7" stroke="currentColor" stroke-width="2"/>
+                <rect x="3" y="14" width="7" height="7" stroke="currentColor" stroke-width="2"/>
+                <rect x="14" y="14" width="7" height="7" stroke="currentColor" stroke-width="2"/>
+              </svg>
+            </button>
+            <button 
+              (click)="cambiarVista('list')" 
+              [class.active]="vistaActual === 'list'"
+              class="view-button"
+              title="Vista en lista"
+            >
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 6H21M8 12H21M8 18H21M3 6H3.01M3 12H3.01M3 18H3.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+          
+          <!-- Selector de ordenamiento -->
+          <div class="sort-selector">
+            <select [(ngModel)]="ordenActual" (change)="aplicarFiltros()" class="sort-select">
+              <option value="nombre">Ordenar por Nombre</option>
+              <option value="precio">Ordenar por Precio</option>
+              <option value="categoria">Ordenar por Categoría</option>
+            </select>
+            <button 
+              (click)="cambiarOrden(ordenActual)" 
+              class="sort-direction"
+              [title]="direccionOrden === 'asc' ? 'Ascendente' : 'Descendente'"
+            >
+              <svg 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                xmlns="http://www.w3.org/2000/svg"
+                [style.transform]="direccionOrden === 'desc' ? 'rotate(180deg)' : 'rotate(0deg)'"
+              >
+                <path d="M12 5L12 19M12 5L6 11M12 5L18 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel de filtros (expandible) -->
+      <div class="filters-panel" [class.visible]="mostrarFiltros">
+        <div class="filters-content">
+          <div class="filter-group">
+            <label class="filter-label">Categoría</label>
+            <select [(ngModel)]="filtros.categoria" (change)="aplicarFiltros()" class="filter-select">
+              <option value="">Todas las categorías</option>
+              <option *ngFor="let categoria of categorias" [value]="categoria.id">
+                {{ categoria.nombre }} ({{ categoria.cantidad }})
+              </option>
+            </select>
+          </div>
+          
+          <div class="filter-group">
+            <label class="filter-label">Marca</label>
+            <select [(ngModel)]="filtros.marca" (change)="aplicarFiltros()" class="filter-select">
+              <option value="">Todas las marcas</option>
+              <option *ngFor="let marca of marcas" [value]="marca.nombre">
+                {{ marca.nombre }} ({{ marca.cantidad }})
+              </option>
+            </select>
+          </div>
+          
+          <div class="filter-group">
+            <label class="filter-label">Precio</label>
+            <div class="filter-options">
+              <label class="filter-checkbox">
+                <input 
+                  type="radio" 
+                  name="precio" 
+                  [checked]="!filtros.conPrecio && !filtros.sinPrecio"
+                  (change)="filtros.conPrecio = false; filtros.sinPrecio = false; aplicarFiltros()"
+                >
+                Todos
+              </label>
+              <label class="filter-checkbox">
+                <input 
+                  type="radio" 
+                  name="precio" 
+                  [(ngModel)]="filtros.conPrecio" 
+                  (change)="filtros.sinPrecio = false; aplicarFiltros()"
+                >
+                Con precio
+              </label>
+              <label class="filter-checkbox">
+                <input 
+                  type="radio" 
+                  name="precio" 
+                  [(ngModel)]="filtros.sinPrecio" 
+                  (change)="filtros.conPrecio = false; aplicarFiltros()"
+                >
+                Consultar precio
+              </label>
+            </div>
+          </div>
+          
+          <div class="filter-actions">
+            <button (click)="limpiarFiltros()" class="clear-filters">Limpiar filtros</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid/Lista de cercos -->
+      <div class="cercos-container" [class.list-view]="vistaActual === 'list'">
+        <div *ngIf="cercosPaginados.length === 0" class="no-results">
+          <div class="no-results-icon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+              <path d="M16 16L12 12L8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>No se encontraron cercos</h3>
+          <p>Intenta ajustar los filtros o términos de búsqueda</p>
+          <button (click)="limpiarFiltros()" class="reset-button">Restablecer filtros</button>
+        </div>
+
+        <div *ngFor="let cerco of cercosPaginados" class="cerco-card" (click)="verDetalle(cerco)">
+          <div class="card-image">
+            <img [src]="cerco.imagen" [alt]="cerco.nombre" onerror="this.src='/imagenes/placeholder-cerco.jpg'">
+            <div *ngIf="cerco.enOferta" class="offer-badge">¡Oferta!</div>
+            <div class="card-overlay">
+              <button (click)="verDetalle(cerco); $event.stopPropagation()" class="quick-view">Ver detalles</button>
+            </div>
+          </div>
+          
+          <div class="card-content">
+            <div class="card-header">
+              <h3 class="cerco-name">{{ cerco.nombre }}</h3>
+              <span class="cerco-category">{{ cerco.categoria }}</span>
+            </div>
+            
+            <p class="cerco-description">{{ cerco.descripcion }}</p>
+            
+            <div class="cerco-features">
+              <span *ngFor="let caracteristica of cerco.caracteristicas.slice(0, 2)" class="feature-tag">
+                {{ caracteristica }}
+              </span>
+              <span *ngIf="cerco.caracteristicas.length > 2" class="feature-more">
+                +{{ cerco.caracteristicas.length - 2 }} más
+              </span>
+            </div>
+            
+            <div class="card-footer">
+              <div class="price-section">
+                <span *ngIf="cerco.enOferta && cerco.precioOriginal" class="original-price">
+                  {{ formatearPrecio(cerco.precioOriginal) }}
+                </span>
+                <span class="current-price" [class.offer-price]="cerco.enOferta">
+                  {{ formatearPrecio(cerco.precio) }}
+                </span>
+              </div>
+              
+              <div class="card-actions">
+                <button (click)="contactarPorWhatsApp(cerco); $event.stopPropagation()" class="contact-btn">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17.472 14.382C17.367 14.382 17.261 14.382 17.156 14.382C16.132 14.382 15.156 13.406 15.156 12.382C15.156 11.358 16.132 10.382 17.156 10.382C18.18 10.382 19.156 11.358 19.156 12.382C19.156 13.406 18.18 14.382 17.156 14.382H17.472Z" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M3 16.5V4.5C3 3.12 4.12 2 5.5 2H18.5C19.88 2 21 3.12 21 4.5V12.5C21 13.88 19.88 15 18.5 15H7L3 16.5Z" stroke="currentColor" stroke-width="1.5"/>
+                  </svg>
+                  Consultar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paginación -->
+      <div *ngIf="totalPaginas > 1" class="pagination">
+        <button 
+          (click)="irAPagina(paginaActual - 1)" 
+          [disabled]="paginaActual === 1"
+          class="pagination-btn"
+        >
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Anterior
+        </button>
+        
+        <div class="pagination-numbers">
+          <button 
+            *ngFor="let pagina of paginasVisibles" 
+            (click)="irAPagina(pagina)"
+            [class.active]="pagina === paginaActual"
+            class="pagination-number"
+          >
+            {{ pagina }}
+          </button>
+        </div>
+        
+        <button 
+          (click)="irAPagina(paginaActual + 1)" 
+          [disabled]="paginaActual === totalPaginas"
+          class="pagination-btn"
+        >
+          Siguiente
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

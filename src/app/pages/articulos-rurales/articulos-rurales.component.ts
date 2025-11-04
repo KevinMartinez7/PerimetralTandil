@@ -116,7 +116,7 @@ export class ArticulosRuralesComponent implements OnInit {
 
   contactarPorArticulo(articulo: ArticuloRural) {
     const mensaje = `¡Hola Perimetral Tandil! Me interesa el producto: ${articulo.nombre}. ¿Podrían darme más información?`;
-    const enlaceWhatsApp = `https://wa.me/5492494567890?text=${encodeURIComponent(mensaje)}`;
+    const enlaceWhatsApp = `https://wa.me/2494316864?text=${encodeURIComponent(mensaje)}`;
     window.open(enlaceWhatsApp, '_blank');
   }
 

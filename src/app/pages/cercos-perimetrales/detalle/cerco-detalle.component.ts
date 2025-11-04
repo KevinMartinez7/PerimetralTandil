@@ -2,17 +2,17 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { ArticulosRuralesService, ArticuloRural } from '../services/articulos-rurales.service';
+import { CercosPerimetralesService, CercoPerimetral } from '../services/cercos-perimetrales.service';
 
 @Component({
-  selector: 'app-articulo-detalle',
+  selector: 'app-cerco-detalle',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './articulo-detalle.component.html',
-  styleUrl: './articulo-detalle.component.scss'
+  templateUrl: './cerco-detalle.component.html',
+  styleUrl: './cerco-detalle.component.scss'
 })
-export class ArticuloDetalleComponent implements OnInit {
-  articulo: ArticuloRural | null = null;
+export class CercoDetalleComponent implements OnInit {
+  cerco: CercoPerimetral | null = null;
   imagenesCarrusel: string[] = [];
   imagenActualIndex: number = 0;
 
@@ -42,44 +42,44 @@ export class ArticuloDetalleComponent implements OnInit {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private articulosService: ArticulosRuralesService
+    private cercosService: CercosPerimetralesService
   ) {}
 
   ngOnInit() {
-    const articuloId = this.route.snapshot.paramMap.get('id');
-    if (articuloId) {
-      this.cargarArticulo(articuloId);
+    const cercoId = this.route.snapshot.paramMap.get('id');
+    if (cercoId) {
+      this.cargarCerco(cercoId);
     }
   }
 
-  cargarArticulo(id: string) {
-    this.articulosService.getArticulos().subscribe(articulos => {
-      this.articulo = articulos.find(a => a.id.toString() === id) || null;
-      if (this.articulo) {
+  cargarCerco(id: string) {
+    this.cercosService.getCercos().subscribe(cercos => {
+      this.cerco = cercos.find(c => c.id.toString() === id) || null;
+      if (this.cerco) {
         // Configurar imágenes específicas para cada producto
-        if (this.articulo.id === 1 && this.articulo.nombre === 'Alambrado Galvanizado 17/15') {
-          // Imágenes específicas para el Alambrado Galvanizado 17/15
+        if (this.cerco.id === 1 && this.cerco.nombre === 'Cerco Metálico Residencial Premium') {
+          // Imágenes específicas para el Cerco Metálico Premium
           this.imagenesCarrusel = [
-            this.articulo.imagen, // Primera imagen (la principal)
-            '/imagenes/Imagen de WhatsApp 2025-10-24 a las 20.21.39_681446a0.jpg', // Segunda imagen
-            '/imagenes/Imagen de WhatsApp 2025-10-24 a las 20.21.34_53367ee0.jpg', // Tercera imagen (repetir la principal)
-            this.articulo.imagen  // Cuarta imagen (repetir la principal)
+            this.cerco.imagen, // Primera imagen (la principal)
+            '/imagenes/cerco-metalico-premium-2.jpg', // Segunda imagen
+            '/imagenes/cerco-metalico-premium-3.jpg', // Tercera imagen
+            this.cerco.imagen  // Cuarta imagen (repetir la principal)
           ];
-        } else if (this.articulo.id === 2 && this.articulo.nombre === 'Poste de Eucalipto Tratado') {
-          // Imágenes específicas para el Poste de Eucalipto Tratado
+        } else if (this.cerco.id === 2 && this.cerco.nombre === 'Cerco de Malla Ciclónica Urbana') {
+          // Imágenes específicas para Malla Ciclónica
           this.imagenesCarrusel = [
-            this.articulo.imagen, // Primera imagen (la principal)
-            '/imagenes/Imagen de WhatsApp 2025-10-24 a las 20.21.29_7d834ac8.jpg', // Segunda imagen
-            '/imagenes/Imagen de WhatsApp 2025-10-24 a las 20.21.29_158e553b.jpg',  // Tercera imagen (repetir la principal)
-            '/imagenes/Imagen de WhatsApp 2025-10-24 a las 20.21.28_134339d6.jpg'  // Cuarta imagen (repetir la principal)
+            this.cerco.imagen, // Primera imagen (la principal)
+            '/imagenes/malla-ciclonica-instalacion.jpg', // Segunda imagen
+            this.cerco.imagen,  // Tercera imagen (repetir la principal)
+            this.cerco.imagen  // Cuarta imagen (repetir la principal)
           ];
         } else {
           // Para otros productos, usar la imagen principal repetida
           this.imagenesCarrusel = [
-            this.articulo.imagen,
-            this.articulo.imagen,
-            this.articulo.imagen,
-            this.articulo.imagen
+            this.cerco.imagen,
+            this.cerco.imagen,
+            this.cerco.imagen,
+            this.cerco.imagen
           ];
         }
       }
@@ -87,7 +87,7 @@ export class ArticuloDetalleComponent implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['/articulos-rurales']);
+    this.router.navigate(['/cercos-perimetrales']);
   }
 
   // Métodos para el carrusel
@@ -198,11 +198,11 @@ export class ArticuloDetalleComponent implements OnInit {
       return;
     }
 
-    if (this.articulo) {
+    if (this.cerco) {
       const mensaje = `¡Hola Perimetral Tandil!
 
-📋 *CONSULTA SOBRE PRODUCTO*
-*Producto:* ${this.articulo.nombre}
+📋 *CONSULTA SOBRE CERCO PERIMETRAL*
+*Producto:* ${this.cerco.nombre}
 
 👤 *DATOS DEL CLIENTE*
 *Nombre:* ${this.formularioContacto.nombre}

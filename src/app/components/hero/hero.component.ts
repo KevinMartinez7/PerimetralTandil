@@ -16,7 +16,7 @@ export class HeroComponent {
   }
 
   openWhatsApp(): void {
-    const phoneNumber = '5492494316864';
+    const phoneNumber = '2494316864';
     const message = encodeURIComponent('Hola, me interesa obtener información sobre sus productos y servicios.');
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');

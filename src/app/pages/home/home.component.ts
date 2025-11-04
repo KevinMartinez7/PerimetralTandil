@@ -28,7 +28,7 @@ export class HomeComponent {
     console.log(`Navegando a la sección: ${section}`);
     
     if (section === 'cercos') {
-      alert('Próximamente: Sección de Cercos Perimetrales para Ciudad');
+      this.router.navigate(['/cercos-perimetrales']);
     } else if (section === 'rurales') {
       this.router.navigate(['/articulos-rurales']);
     }
