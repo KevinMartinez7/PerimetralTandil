@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -22,6 +22,7 @@ export class ArticuloDetalleComponent implements OnInit {
   articulo: ArticuloRural | null = null;
   imagenesCarrusel: string[] = [];
   imagenActualIndex: number = 0;
+  loading: boolean = true;
 
   // Control del modal del formulario
   mostrarFormularioWhatsApp: boolean = false;
@@ -49,18 +50,28 @@ export class ArticuloDetalleComponent implements OnInit {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private productosService: ProductosService
+    private productosService: ProductosService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
+    console.log('🚀 ArticuloDetalleComponent inicializado');
     const articuloId = this.route.snapshot.paramMap.get('id');
+    console.log('🆔 ID del artículo desde la ruta:', articuloId);
     if (articuloId) {
       this.cargarArticulo(articuloId);
+    } else {
+      console.error('❌ No se proporcionó ID del artículo');
+      this.loading = false;
+      this.cdr.detectChanges();
     }
   }
 
   async cargarArticulo(id: string) {
     console.log('🔍 Buscando producto con ID:', id);
+    this.loading = true;
+    this.cdr.detectChanges(); // Forzar actualización del loading
+    
     try {
       // Cargar productos rurales desde Supabase
       const productos = await this.productosService.getProductos('rural');
@@ -81,6 +92,8 @@ export class ArticuloDetalleComponent implements OnInit {
           precio_original: productoEncontrado.precio_original
         };
         
+        console.log('🎯 Artículo asignado al componente:', this.articulo);
+        
         // Configurar carrusel de imágenes
         if (productoEncontrado.imagenes && productoEncontrado.imagenes.length > 0) {
           this.imagenesCarrusel = productoEncontrado.imagenes;
@@ -96,6 +109,7 @@ export class ArticuloDetalleComponent implements OnInit {
         }
         
         console.log('🖼️ Imágenes del carrusel:', this.imagenesCarrusel);
+        console.log('🔄 Estado del componente - articulo existe:', !!this.articulo);
       } else {
         console.error('❌ No se encontró el producto con ID:', id);
         this.articulo = null;
@@ -103,6 +117,10 @@ export class ArticuloDetalleComponent implements OnInit {
     } catch (error) {
       console.error('❌ Error al cargar producto:', error);
       this.articulo = null;
+    } finally {
+      this.loading = false;
+      this.cdr.detectChanges(); // Forzar actualización al finalizar
+      console.log('✨ Loading finalizado. Estado:', { loading: this.loading, articulo: !!this.articulo });
     }
   }
 

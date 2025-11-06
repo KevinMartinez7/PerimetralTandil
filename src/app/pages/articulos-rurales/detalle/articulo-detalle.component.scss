@@ -481,6 +481,62 @@
   100% { transform: rotate(360deg); }
 }
 
+/* Error */
+.error-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0a0a;
+
+  .error-content {
+    text-align: center;
+    color: #E5E7EB;
+    max-width: 400px;
+    padding: 2rem;
+
+    h2 {
+      font-family: 'Orbitron', sans-serif;
+      color: #DC2626;
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+    }
+
+    p {
+      margin-bottom: 2rem;
+      color: #9CA3AF;
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: transparent;
+      border: 2px solid #FCD34D;
+      border-radius: 8px;
+      color: #FCD34D;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      &:hover {
+        background: #FCD34D;
+        color: #0a0a0a;
+        transform: translateX(-2px);
+      }
+    }
+  }
+}
+
 /* Modal del Formulario de WhatsApp */
 .modal-overlay {
   position: fixed;
