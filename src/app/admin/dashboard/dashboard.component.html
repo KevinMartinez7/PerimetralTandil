@@ -1,0 +1,111 @@
+<div class="dashboard-container">
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="header-content">
+      <div class="header-left">
+        <h1>Panel de Administración</h1>
+        <p>Bienvenido, {{ userName }}</p>
+      </div>
+      <div class="header-right">
+        <button class="btn-logout" (click)="logout()">
+          Cerrar Sesión
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenido Principal -->
+  <div class="dashboard-content">
+    <!-- Estadísticas -->
+    <section class="stats-section">
+      <h2>Resumen General</h2>
+      <div class="stats-grid" *ngIf="!loading">
+        <div class="stat-card">
+          <div class="stat-icon productos">
+            <span>📦</span>
+          </div>
+          <div class="stat-info">
+            <h3>{{ stats.totalProductos }}</h3>
+            <p>Total Productos</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon activos">
+            <span>✓</span>
+          </div>
+          <div class="stat-info">
+            <h3>{{ stats.productosActivos }}</h3>
+            <p>Productos Activos</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon categorias">
+            <span>📁</span>
+          </div>
+          <div class="stat-info">
+            <h3>{{ stats.totalCategorias }}</h3>
+            <p>Categorías</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon marcas">
+            <span>🏷️</span>
+          </div>
+          <div class="stat-info">
+            <h3>{{ stats.totalMarcas }}</h3>
+            <p>Marcas</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="loading-state" *ngIf="loading">
+        <p>Cargando estadísticas...</p>
+      </div>
+    </section>
+
+    <!-- Acciones Rápidas -->
+    <section class="quick-actions">
+      <h2>Acciones Rápidas</h2>
+      <div class="actions-grid">
+        <a routerLink="/admin/productos" class="action-card">
+          <div class="action-icon">📦</div>
+          <h3>Gestionar Productos</h3>
+          <p>Ver, agregar y editar productos</p>
+        </a>
+
+        <a routerLink="/admin/categorias" class="action-card">
+          <div class="action-icon">📁</div>
+          <h3>Gestionar Categorías</h3>
+          <p>Organizar productos por categorías</p>
+        </a>
+
+        <a routerLink="/admin/marcas" class="action-card">
+          <div class="action-icon">🏷️</div>
+          <h3>Gestionar Marcas</h3>
+          <p>Administrar marcas de productos</p>
+        </a>
+
+        <a routerLink="/admin/ventas" class="action-card">
+          <div class="action-icon">💰</div>
+          <h3>Registrar Ventas</h3>
+          <p>Crear facturas y ventas</p>
+        </a>
+
+        <a routerLink="/admin/clientes" class="action-card">
+          <div class="action-icon">👥</div>
+          <h3>Gestionar Clientes</h3>
+          <p>Base de datos de clientes</p>
+        </a>
+
+        <a routerLink="/admin/reportes" class="action-card">
+          <div class="action-icon">📊</div>
+          <h3>Ver Reportes</h3>
+          <p>Análisis y estadísticas</p>
+        </a>
+      </div>
+    </section>
+  </div>
+</div>

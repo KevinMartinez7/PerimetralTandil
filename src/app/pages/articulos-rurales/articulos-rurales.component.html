@@ -146,7 +146,7 @@
                   </button>
                 </div>
                 <!-- Badge de oferta -->
-                <div *ngIf="articulo.enOferta" class="badge-oferta">¡OFERTA!</div>
+                <div *ngIf="articulo.en_oferta" class="badge-oferta">¡OFERTA!</div>
                 <!-- Badge de stock -->
                 <div class="badge-stock" [class.stock-bajo]="articulo.stock < 10">
                   Stock: {{articulo.stock}}
@@ -176,10 +176,10 @@
 
                 <!-- Precio -->
                 <div class="articulo-precio">
-                  <span *ngIf="articulo.enOferta && articulo.precioOriginal" class="precio-original">
-                    {{formatearPrecio(articulo.precioOriginal)}}
+                  <span *ngIf="articulo.en_oferta && articulo.precio_original" class="precio-original">
+                    {{formatearPrecio(articulo.precio_original)}}
                   </span>
-                  <span class="precio-actual" [class.precio-oferta]="articulo.enOferta">
+                  <span class="precio-actual" [class.precio-oferta]="articulo.en_oferta">
                     {{formatearPrecio(articulo.precio)}}
                   </span>
                 </div>

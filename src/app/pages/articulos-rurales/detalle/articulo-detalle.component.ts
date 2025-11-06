@@ -2,7 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { ArticulosRuralesService, ArticuloRural } from '../services/articulos-rurales.service';
+import { ProductosService, Producto } from '../../../core/services/productos.service';
+
+// Interface local para compatibilidad con el template
+interface ArticuloRural extends Producto {
+  imagen: string;
+  en_oferta?: boolean;
+  precio_original?: number;
+}
 
 @Component({
   selector: 'app-articulo-detalle',
@@ -42,7 +49,7 @@ export class ArticuloDetalleComponent implements OnInit {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private articulosService: ArticulosRuralesService
+    private productosService: ProductosService
   ) {}
 
   ngOnInit() {
@@ -52,38 +59,51 @@ export class ArticuloDetalleComponent implements OnInit {
     }
   }
 
-  cargarArticulo(id: string) {
-    this.articulosService.getArticulos().subscribe(articulos => {
-      this.articulo = articulos.find(a => a.id.toString() === id) || null;
-      if (this.articulo) {
-        // Configurar imágenes específicas para cada producto
-        if (this.articulo.id === 1 && this.articulo.nombre === 'Alambrado Galvanizado 17/15') {
-          // Imágenes específicas para el Alambrado Galvanizado 17/15
-          this.imagenesCarrusel = [
-            this.articulo.imagen, // Primera imagen (la principal)
-            '/imagenes/Imagen de WhatsApp 2025-10-24 a las 20.21.39_681446a0.jpg', // Segunda imagen
-            '/imagenes/Imagen de WhatsApp 2025-10-24 a las 20.21.34_53367ee0.jpg', // Tercera imagen (repetir la principal)
-            this.articulo.imagen  // Cuarta imagen (repetir la principal)
-          ];
-        } else if (this.articulo.id === 2 && this.articulo.nombre === 'Poste de Eucalipto Tratado') {
-          // Imágenes específicas para el Poste de Eucalipto Tratado
-          this.imagenesCarrusel = [
-            this.articulo.imagen, // Primera imagen (la principal)
-            '/imagenes/Imagen de WhatsApp 2025-10-24 a las 20.21.29_7d834ac8.jpg', // Segunda imagen
-            '/imagenes/Imagen de WhatsApp 2025-10-24 a las 20.21.29_158e553b.jpg',  // Tercera imagen (repetir la principal)
-            '/imagenes/Imagen de WhatsApp 2025-10-24 a las 20.21.28_134339d6.jpg'  // Cuarta imagen (repetir la principal)
-          ];
+  async cargarArticulo(id: string) {
+    console.log('🔍 Buscando producto con ID:', id);
+    try {
+      // Cargar productos rurales desde Supabase
+      const productos = await this.productosService.getProductos('rural');
+      console.log('📦 Productos recibidos:', productos);
+      
+      // Buscar el producto por ID
+      const productoEncontrado = productos.find(p => p.id?.toString() === id);
+      console.log('✅ Producto encontrado:', productoEncontrado);
+      
+      if (productoEncontrado) {
+        // Convertir Producto a ArticuloRural
+        this.articulo = {
+          ...productoEncontrado,
+          imagen: productoEncontrado.imagenes && productoEncontrado.imagenes.length > 0 
+            ? productoEncontrado.imagenes[0] 
+            : '/imagenes/placeholder.jpg',
+          en_oferta: productoEncontrado.en_oferta,
+          precio_original: productoEncontrado.precio_original
+        };
+        
+        // Configurar carrusel de imágenes
+        if (productoEncontrado.imagenes && productoEncontrado.imagenes.length > 0) {
+          this.imagenesCarrusel = productoEncontrado.imagenes;
         } else {
-          // Para otros productos, usar la imagen principal repetida
+          // Si no hay imágenes, usar placeholder
+          const imagenFallback = this.articulo?.imagen || '/imagenes/placeholder.jpg';
           this.imagenesCarrusel = [
-            this.articulo.imagen,
-            this.articulo.imagen,
-            this.articulo.imagen,
-            this.articulo.imagen
+            imagenFallback,
+            imagenFallback,
+            imagenFallback,
+            imagenFallback
           ];
         }
+        
+        console.log('🖼️ Imágenes del carrusel:', this.imagenesCarrusel);
+      } else {
+        console.error('❌ No se encontró el producto con ID:', id);
+        this.articulo = null;
       }
-    });
+    } catch (error) {
+      console.error('❌ Error al cargar producto:', error);
+      this.articulo = null;
+    }
   }
 
   goBack() {
