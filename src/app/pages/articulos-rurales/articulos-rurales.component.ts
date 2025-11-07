@@ -143,9 +143,9 @@ export class ArticulosRuralesComponent implements OnInit {
       this.cdr.detectChanges();
       console.log('🎉 Carga principal completa. Mostrando', this.articulosFiltrados.length, 'productos');
 
-      // Paso 6: Cargar categorías y marcas en segundo plano
+      // Paso 6: Cargar categorías y marcas (ahora que tenemos los productos)
       console.log('🔍 Paso 6: Iniciando carga de categorías y marcas...');
-      this.cargarCategoriasYMarcas();
+      await this.cargarCategoriasYMarcas();
       
     } catch (error) {
       console.error('❌ Error crítico al cargar datos:', error);
@@ -169,18 +169,41 @@ export class ArticulosRuralesComponent implements OnInit {
         id: c.id || c.nombre,
         nombre: c.nombre,
         slug: c.nombre.toLowerCase().replace(/\s+/g, '-'),
-        cantidad: this.contarProductosPorCategoria(c.nombre)
+        cantidad: 0 // Se calculará después
       }));
+      
+      // Calcular cantidades después de tener los artículos cargados
+      this.categorias.forEach(categoria => {
+        categoria.cantidad = this.contarProductosPorCategoria(categoria.nombre);
+      });
+      
       console.log('✅ Categorías cargadas:', this.categorias.length);
+      console.log('📊 Categorías con cantidades:', this.categorias);
 
       // Cargar marcas
       const marcasData = await this.productosService.getMarcas();
       this.marcas = marcasData.map(m => ({
         id: m.id || m.nombre,
         nombre: m.nombre,
-        cantidad: this.contarProductosPorMarca(m.nombre)
+        cantidad: 0 // Se calculará después
       }));
+      
+      // Calcular cantidades después de tener los artículos cargados
+      this.marcas.forEach(marca => {
+        marca.cantidad = this.contarProductosPorMarca(marca.nombre);
+      });
+      
       console.log('✅ Marcas cargadas:', this.marcas.length);
+      console.log('📊 Marcas con cantidades:', this.marcas);
+
+      // Forzar detección de cambios después de cargar categorías y marcas
+      this.cdr.detectChanges();
+      
+      // Pequeño delay para asegurar que la vista se actualice
+      setTimeout(() => {
+        this.cdr.detectChanges();
+        console.log('🔄 Vista actualizada con categorías y marcas');
+      }, 100);
 
     } catch (error) {
       console.error('⚠️ Error al cargar categorías/marcas (no crítico):', error);
@@ -233,6 +256,7 @@ export class ArticulosRuralesComponent implements OnInit {
   }
 
   filtrarPorCategoria(categoria: string) {
+    console.log('🔍 Filtrar por categoría:', categoria);
     if (this.filtros.categoria === categoria) {
       delete this.filtros.categoria;
     } else {
@@ -242,6 +266,7 @@ export class ArticulosRuralesComponent implements OnInit {
   }
 
   filtrarPorMarca(marca: string) {
+    console.log('🔍 Filtrar por marca:', marca);
     if (this.filtros.marca === marca) {
       delete this.filtros.marca;
     } else {
