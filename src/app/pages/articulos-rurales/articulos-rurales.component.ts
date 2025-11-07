@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -51,36 +51,118 @@ export class ArticulosRuralesComponent implements OnInit {
   // Estado del menú lateral
   mostrarFiltros = true;
   
+  // Estado de carga
+  cargando: boolean = true;
+  
   constructor(
     private productosService: ProductosService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
+    console.log('🚀 ArticulosRuralesComponent ngOnInit iniciado');
+    console.log('🔧 Estado inicial:', {
+      cargando: this.cargando,
+      articulos: this.articulos.length,
+      articulosFiltrados: this.articulosFiltrados.length
+    });
+    
     this.cargarDatos();
+    
+    // Timeout de seguridad para evitar loading infinito
+    setTimeout(() => {
+      if (this.cargando) {
+        console.warn('⚠️ Timeout de carga alcanzado, finalizando loading...');
+        console.warn('Estado al timeout:', {
+          articulos: this.articulos.length,
+          articulosFiltrados: this.articulosFiltrados.length
+        });
+        this.cargando = false;
+        this.cdr.detectChanges(); // Forzar actualización en timeout
+      }
+    }, 10000); // 10 segundos máximo
   }
 
   async cargarDatos() {
+    console.log('🔄 Iniciando carga de datos...');
+    this.cargando = true;
+    
     try {
-      console.log('🔄 Cargando artículos rurales desde Supabase...');
+      // Paso 1: Verificar que el servicio esté disponible
+      console.log('🔍 Paso 1: Verificando servicio...');
+      if (!this.productosService) {
+        throw new Error('ProductosService no está disponible');
+      }
 
-      // Cargar productos tipo 'rural'
+      // Paso 2: Cargar productos tipo 'rural'
+      console.log('� Paso 2: Llamando a getProductos("rural")...');
       const productos = await this.productosService.getProductos('rural');
-      console.log('📦 Productos rurales recibidos:', productos);
+      console.log('📦 Paso 2 completado. Productos recibidos:', productos?.length || 0);
 
-      // Transformar productos a artículos para compatibilidad con el template
-      this.articulos = productos.map(p => ({
-        ...p,
-        imagen: (p.imagenes && p.imagenes[0]) || '/imagenes/no-image.png',
-        categoria: p.categoria || '',
-        marca: p.marca || '',
-        en_oferta: p.en_oferta || false,
-        precio_original: p.precio_original,
-        caracteristicas: Array.isArray(p.caracteristicas) ? p.caracteristicas : []
-      })) as ArticuloRural[];
+      if (!productos || !Array.isArray(productos)) {
+        console.error('❌ Productos no es un array válido:', productos);
+        throw new Error('Respuesta de productos inválida');
+      }
 
-      console.log('✅ Artículos procesados:', this.articulos.length);
+      if (productos.length === 0) {
+        console.log('⚠️ No se encontraron productos rurales');
+        this.articulos = [];
+        this.articulosFiltrados = [];
+        this.cargando = false;
+        return;
+      }
 
+      // Paso 3: Transformar productos
+      console.log('� Paso 3: Transformando productos...');
+      this.articulos = productos.map((p, index) => {
+        console.log(`  - Procesando producto ${index + 1}:`, p.nombre);
+        return {
+          ...p,
+          imagen: (p.imagenes && p.imagenes[0]) || '/imagenes/no-image.png',
+          categoria: p.categoria || '',
+          marca: p.marca || '',
+          en_oferta: p.en_oferta || false,
+          precio_original: p.precio_original,
+          caracteristicas: Array.isArray(p.caracteristicas) ? p.caracteristicas : []
+        } as ArticuloRural;
+      });
+
+      console.log('✅ Paso 3 completado. Artículos procesados:', this.articulos.length);
+
+      // Paso 4: Mostrar todos los productos inicialmente
+      console.log('🔍 Paso 4: Inicializando artículos filtrados...');
+      this.articulosFiltrados = [...this.articulos];
+      console.log('✅ Paso 4 completado. Artículos filtrados:', this.articulosFiltrados.length);
+
+      // Paso 5: Finalizar carga principal
+      console.log('🔍 Paso 5: Finalizando carga...');
+      this.cargando = false;
+      
+      // Forzar detección de cambios
+      this.cdr.detectChanges();
+      console.log('🎉 Carga principal completa. Mostrando', this.articulosFiltrados.length, 'productos');
+
+      // Paso 6: Cargar categorías y marcas en segundo plano
+      console.log('🔍 Paso 6: Iniciando carga de categorías y marcas...');
+      this.cargarCategoriasYMarcas();
+      
+    } catch (error) {
+      console.error('❌ Error crítico al cargar datos:', error);
+      if (error instanceof Error) {
+        console.error('❌ Stack trace:', error.stack);
+      }
+      this.cargando = false;
+      this.cdr.detectChanges(); // Forzar actualización también en error
+      this.articulos = [];
+      this.articulosFiltrados = [];
+    }
+  }
+
+  async cargarCategoriasYMarcas() {
+    try {
+      console.log('🔄 Cargando categorías y marcas en segundo plano...');
+      
       // Cargar categorías tipo 'rural'
       const categoriasData = await this.productosService.getCategorias('rural');
       this.categorias = categoriasData.map(c => ({
@@ -89,7 +171,6 @@ export class ArticulosRuralesComponent implements OnInit {
         slug: c.nombre.toLowerCase().replace(/\s+/g, '-'),
         cantidad: this.contarProductosPorCategoria(c.nombre)
       }));
-
       console.log('✅ Categorías cargadas:', this.categorias.length);
 
       // Cargar marcas
@@ -99,17 +180,21 @@ export class ArticulosRuralesComponent implements OnInit {
         nombre: m.nombre,
         cantidad: this.contarProductosPorMarca(m.nombre)
       }));
-
       console.log('✅ Marcas cargadas:', this.marcas.length);
 
-      // Aplicar filtros iniciales
-      this.aplicarFiltros();
     } catch (error) {
-      console.error('❌ Error al cargar datos:', error);
+      console.error('⚠️ Error al cargar categorías/marcas (no crítico):', error);
+      // No afecta la funcionalidad principal
     }
   }
 
   aplicarFiltros() {
+    // Solo aplicar filtros si los datos ya están cargados
+    if (this.cargando || this.articulos.length === 0) {
+      console.log('⏳ Esperando datos antes de aplicar filtros...');
+      return;
+    }
+
     console.log('🔍 Aplicando filtros:', this.filtros, 'Búsqueda:', this.busqueda);
     
     this.articulosFiltrados = this.articulos.filter(articulo => {
@@ -144,6 +229,7 @@ export class ArticulosRuralesComponent implements OnInit {
     });
 
     console.log('✅ Artículos filtrados:', this.articulosFiltrados.length);
+    this.cdr.detectChanges(); // Forzar actualización después de filtrar
   }
 
   filtrarPorCategoria(categoria: string) {
@@ -181,9 +267,15 @@ export class ArticulosRuralesComponent implements OnInit {
   }
 
   limpiarFiltros() {
+    console.log('🧹 Limpiando filtros...');
     this.filtros = {};
     this.busqueda = '';
-    this.aplicarFiltros();
+    // Mostrar todos los productos cuando se limpian los filtros
+    if (!this.cargando && this.articulos.length > 0) {
+      this.articulosFiltrados = [...this.articulos];
+      this.cdr.detectChanges(); // Forzar actualización
+      console.log('📋 Mostrando todos los productos después de limpiar:', this.articulosFiltrados.length);
+    }
   }
 
   toggleFiltros() {

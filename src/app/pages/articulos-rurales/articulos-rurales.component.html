@@ -127,12 +127,20 @@
         <main class="productos-grid">
           
           <!-- Contador de resultados -->
-          <div class="resultados-header">
+          <div class="resultados-header" *ngIf="!cargando">
             <h2>Productos Encontrados: {{articulosFiltrados.length}}</h2>
           </div>
 
+          <!-- Mensaje de carga -->
+          <div *ngIf="cargando" class="loading-container">
+            <div class="loading-content">
+              <div class="spinner"></div>
+              <p>Cargando productos...</p>
+            </div>
+          </div>
+
           <!-- Grid de artículos -->
-          <div class="articulos-grid">
+          <div class="articulos-grid" *ngIf="!cargando">
             <div 
               *ngFor="let articulo of articulosFiltrados" 
               class="articulo-card">
@@ -197,7 +205,7 @@
           </div>
 
           <!-- Mensaje si no hay productos -->
-          <div *ngIf="articulosFiltrados.length === 0" class="no-productos">
+          <div *ngIf="!cargando && articulosFiltrados.length === 0" class="no-productos">
             <div class="no-productos-content">
               <svg class="no-productos-icon" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
