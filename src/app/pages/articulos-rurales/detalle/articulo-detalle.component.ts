@@ -80,6 +80,9 @@ export class ArticuloDetalleComponent implements OnInit {
       // Buscar el producto por ID
       const productoEncontrado = productos.find(p => p.id?.toString() === id);
       console.log('✅ Producto encontrado:', productoEncontrado);
+      console.log('🔍 Propiedades del producto encontrado:', Object.keys(productoEncontrado || {}));
+      console.log('📊 Stock crudo del producto:', productoEncontrado?.stock);
+      console.log('📊 Tipo de stock:', typeof productoEncontrado?.stock);
       
       if (productoEncontrado) {
         // Convertir Producto a ArticuloRural
@@ -93,6 +96,8 @@ export class ArticuloDetalleComponent implements OnInit {
         };
         
         console.log('🎯 Artículo asignado al componente:', this.articulo);
+        console.log('📊 Stock del producto:', this.articulo?.stock, typeof this.articulo?.stock);
+        console.log('🏷️ Características del producto:', this.articulo?.caracteristicas, typeof this.articulo?.caracteristicas);
         
         // Configurar carrusel de imágenes
         if (productoEncontrado.imagenes && productoEncontrado.imagenes.length > 0) {
@@ -119,7 +124,10 @@ export class ArticuloDetalleComponent implements OnInit {
       this.articulo = null;
     } finally {
       this.loading = false;
-      this.cdr.detectChanges(); // Forzar actualización al finalizar
+      // Usar setTimeout para evitar el error de detección de cambios
+      setTimeout(() => {
+        this.cdr.detectChanges();
+      }, 0);
       console.log('✨ Loading finalizado. Estado:', { loading: this.loading, articulo: !!this.articulo });
     }
   }
@@ -269,5 +277,51 @@ ${this.formularioContacto.comentario}
       return 'Consultar precio';
     }
     return '$' + precio.toLocaleString();
+  }
+
+  formatearStock(stock: number | undefined | null): string {
+    console.log('🔢 Formateando stock:', stock, typeof stock);
+    
+    if (stock === undefined || stock === null) {
+      return 'Consultar disponibilidad';
+    }
+    
+    if (stock === 0) {
+      return 'Sin stock';
+    }
+    
+    return `${stock} unidades disponibles`;
+  }
+
+  obtenerCaracteristicas(): { clave: string, valor: string }[] {
+    if (!this.articulo?.caracteristicas) {
+      return [];
+    }
+
+    // Si es un array, devolverlo como está
+    if (Array.isArray(this.articulo.caracteristicas)) {
+      return this.articulo.caracteristicas.map((car, index) => ({
+        clave: `Característica ${index + 1}`,
+        valor: car
+      }));
+    }
+
+    // Si es un objeto, convertir a array de pares clave-valor
+    if (typeof this.articulo.caracteristicas === 'object') {
+      return Object.entries(this.articulo.caracteristicas).map(([clave, valor]) => ({
+        clave: clave,
+        valor: String(valor)
+      }));
+    }
+
+    // Si es una string, tratarla como característica única
+    if (typeof this.articulo.caracteristicas === 'string') {
+      return [{
+        clave: 'Característica',
+        valor: this.articulo.caracteristicas
+      }];
+    }
+
+    return [];
   }
 }

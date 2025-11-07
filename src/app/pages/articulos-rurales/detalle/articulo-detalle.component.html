@@ -120,17 +120,17 @@
         <div class="caracteristicas-grid">
           <div class="caracteristica-item">
             <strong>Descripción</strong>
-            <p>{{articulo.nombre}}</p>
+            <p>{{articulo.descripcion}}</p>
           </div>
           
-          <div class="caracteristica-item" *ngFor="let caracteristica of articulo.caracteristicas">
-            <strong>Característica</strong>
-            <p>{{caracteristica}}</p>
+          <div class="caracteristica-item" *ngFor="let caracteristica of obtenerCaracteristicas()">
+            <strong>{{caracteristica.clave}}</strong>
+            <p>{{caracteristica.valor}}</p>
           </div>
           
           <div class="caracteristica-item">
             <strong>Stock disponible</strong>
-            <p>{{articulo.stock}} unidades</p>
+            <p>{{formatearStock(articulo.stock)}}</p>
           </div>
           
           <div class="caracteristica-item" *ngIf="articulo.en_oferta">
