@@ -77,6 +77,7 @@ export class ArticulosRuralesComponent implements OnInit {
     this.filtros = {};
     this.busqueda = '';
     this.cargando = true;
+    this.mostrarFiltros = true; // Asegurar que los filtros estén visibles
     
     // Forzar detección de cambios inicial con estrategia agresiva
     this.cdr.markForCheck();
@@ -86,14 +87,30 @@ export class ArticulosRuralesComponent implements OnInit {
     
     // Verificación automática del estado cada 2 segundos
     const intervaloVerificacion = setInterval(() => {
+      // Verificar productos principales
       if (this.cargando && this.articulos.length > 0 && this.articulosFiltrados.length > 0) {
-        console.log('🔧 AUTO-RECOVERY: Detectado estado inconsistente, corrigiendo...');
+        console.log('🔧 AUTO-RECOVERY: Detectado estado inconsistente en productos, corrigiendo...');
         this.cargando = false;
         this.cdr.markForCheck();
         this.cdr.detectChanges();
-        clearInterval(intervaloVerificacion);
       }
+      
+      // Verificar categorías y marcas (después de 4 segundos para dar tiempo a cargar)
+      setTimeout(() => {
+        if (this.articulos.length > 0 && this.categorias.length === 0) {
+          console.log('🔧 AUTO-RECOVERY: Categorías faltantes, recargando...');
+          this.cargarCategoriasYMarcas();
+        }
+      }, 4000);
     }, 2000);
+    
+    // Auto-recovery adicional específico para filtros
+    setTimeout(() => {
+      if (this.articulos.length > 0 && (this.categorias.length === 0 || this.marcas.length === 0)) {
+        console.log('🔧 AUTO-RECOVERY: Forzando carga de categorías y marcas...');
+        this.cargarCategoriasYMarcas();
+      }
+    }, 5000);
     
     // Limpiar el intervalo después de 30 segundos
     setTimeout(() => {
@@ -218,7 +235,12 @@ export class ArticulosRuralesComponent implements OnInit {
 
   async cargarCategoriasYMarcas() {
     try {
-      console.log('🔄 Cargando categorías y marcas en segundo plano...');
+      console.log('🔄 Cargando categorías y marcas...');
+      console.log('🔧 Estado antes de cargar filtros:', {
+        articulos: this.articulos.length,
+        categorias: this.categorias.length,
+        marcas: this.marcas.length
+      });
       
       // Cargar categorías tipo 'rural'
       const categoriasData = await this.productosService.getCategorias('rural');
@@ -253,18 +275,47 @@ export class ArticulosRuralesComponent implements OnInit {
       console.log('✅ Marcas cargadas:', this.marcas.length);
       console.log('📊 Marcas con cantidades:', this.marcas);
 
-      // Forzar detección de cambios después de cargar categorías y marcas
+      // Estrategia agresiva de detección de cambios para filtros
+      this.cdr.markForCheck();
       this.cdr.detectChanges();
       
-      // Pequeño delay para asegurar que la vista se actualice
       setTimeout(() => {
+        this.cdr.markForCheck();
         this.cdr.detectChanges();
-        console.log('🔄 Vista actualizada con categorías y marcas');
+        console.log('🔄 Vista actualizada con categorías y marcas (1er intento)');
       }, 100);
+      
+      setTimeout(() => {
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
+        console.log('🔄 Vista actualizada con categorías y marcas (2do intento)');
+      }, 300);
+      
+      console.log('🔧 Estado después de cargar filtros:', {
+        categorias: this.categorias.length,
+        marcas: this.marcas.length,
+        mostrarFiltros: this.mostrarFiltros
+      });
+      
+      // Asegurar que el sidebar esté visible
+      this.mostrarFiltros = true;
+      
+      // Una detección de cambios final para asegurar visibilidad del sidebar
+      setTimeout(() => {
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
+        console.log('🔄 Sidebar asegurado como visible');
+      }, 500);
 
     } catch (error) {
-      console.error('⚠️ Error al cargar categorías/marcas (no crítico):', error);
-      // No afecta la funcionalidad principal
+      console.error('⚠️ Error al cargar categorías/marcas:', error);
+      // Reintentar después de 2 segundos
+      setTimeout(() => {
+        if (this.articulos.length > 0 && (this.categorias.length === 0 || this.marcas.length === 0)) {
+          console.log('🔄 Reintentando carga de categorías y marcas...');
+          this.cargarCategoriasYMarcas();
+        }
+      }, 2000);
     }
   }
 
@@ -364,6 +415,14 @@ export class ArticulosRuralesComponent implements OnInit {
     if (this.articulos.length > 0) {
       this.articulosFiltrados = [...this.articulos];
       this.cargando = false; // Asegurar que no esté cargando
+      this.mostrarFiltros = true; // Asegurar que los filtros estén visibles
+      
+      // Si no hay categorías/marcas, cargarlas
+      if (this.categorias.length === 0 || this.marcas.length === 0) {
+        console.log('🔄 Recargando categorías y marcas desde limpiarFiltros...');
+        this.cargarCategoriasYMarcas();
+      }
+      
       this.cdr.detectChanges(); // Forzar actualización
       console.log('📋 Mostrando todos los productos después de limpiar:', this.articulosFiltrados.length);
     } else {
@@ -436,7 +495,9 @@ export class ArticulosRuralesComponent implements OnInit {
     console.log('🔧 Estado actual:', {
       cargando: this.cargando,
       articulos: this.articulos.length,
-      articulosFiltrados: this.articulosFiltrados.length
+      articulosFiltrados: this.articulosFiltrados.length,
+      categorias: this.categorias.length,
+      marcas: this.marcas.length
     });
     
     // Si hay productos pero no están filtrados, restaurar
@@ -449,6 +510,12 @@ export class ArticulosRuralesComponent implements OnInit {
     if (this.cargando) {
       this.cargando = false;
       console.log('✅ RECOVERY: Loading detenido');
+    }
+    
+    // Si hay productos pero no categorías/marcas, cargar
+    if (this.articulos.length > 0 && (this.categorias.length === 0 || this.marcas.length === 0)) {
+      console.log('✅ RECOVERY: Recargando categorías y marcas');
+      this.cargarCategoriasYMarcas();
     }
     
     // Estrategia agresiva de detección de cambios
