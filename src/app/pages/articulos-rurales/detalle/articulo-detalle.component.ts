@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -18,11 +18,18 @@ interface ArticuloRural extends Producto {
   templateUrl: './articulo-detalle.component.html',
   styleUrl: './articulo-detalle.component.scss'
 })
-export class ArticuloDetalleComponent implements OnInit {
+export class ArticuloDetalleComponent implements OnInit, OnDestroy {
   articulo: ArticuloRural | null = null;
   imagenesCarrusel: string[] = [];
   imagenActualIndex: number = 0;
   loading: boolean = true;
+
+  // Auto-recuperación
+  private intentosRecuperacion = 0;
+  private maxIntentosRecuperacion = 3;
+  private timerRecuperacion: any = null;
+  private timerTimeoutSeguridad: any = null;
+  private timerBackupRecuperacion: any = null;
 
   // Control del modal del formulario
   mostrarFormularioWhatsApp: boolean = false;
@@ -59,6 +66,8 @@ export class ArticuloDetalleComponent implements OnInit {
     const articuloId = this.route.snapshot.paramMap.get('id');
     console.log('🆔 ID del artículo desde la ruta:', articuloId);
     if (articuloId) {
+      // Inicializar mecanismo de auto-recuperación
+      this.iniciarRecuperacionAutomatica();
       this.cargarArticulo(articuloId);
     } else {
       console.error('❌ No se proporcionó ID del artículo');
@@ -67,13 +76,34 @@ export class ArticuloDetalleComponent implements OnInit {
     }
   }
 
+  ngOnDestroy() {
+    console.log('🧹 ArticuloDetalleComponent destruyéndose - limpiando todos los timers');
+    this.detenerRecuperacionAutomatica();
+    
+    // Limpieza adicional por si acaso
+    if (this.timerRecuperacion) {
+      clearInterval(this.timerRecuperacion);
+      this.timerRecuperacion = null;
+    }
+    if (this.timerTimeoutSeguridad) {
+      clearTimeout(this.timerTimeoutSeguridad);
+      this.timerTimeoutSeguridad = null;
+    }
+    if (this.timerBackupRecuperacion) {
+      clearInterval(this.timerBackupRecuperacion);
+      this.timerBackupRecuperacion = null;
+    }
+  }
+
   async cargarArticulo(id: string) {
     console.log('🔍 Buscando producto con ID:', id);
     this.loading = true;
+    this.cdr.markForCheck();
     this.cdr.detectChanges(); // Forzar actualización del loading
     
     try {
       // Cargar productos rurales desde Supabase
+      console.log('📞 Llamando a ProductosService.getProductos()...');
       const productos = await this.productosService.getProductos('rural');
       console.log('📦 Productos recibidos:', productos);
       
@@ -115,6 +145,15 @@ export class ArticuloDetalleComponent implements OnInit {
         
         console.log('🖼️ Imágenes del carrusel:', this.imagenesCarrusel);
         console.log('🔄 Estado del componente - articulo existe:', !!this.articulo);
+        
+        // Múltiples actualizaciones agresivas para asegurar que se renderice
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
+        setTimeout(() => {
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
+        }, 50);
+        
       } else {
         console.error('❌ No se encontró el producto con ID:', id);
         this.articulo = null;
@@ -126,9 +165,119 @@ export class ArticuloDetalleComponent implements OnInit {
       this.loading = false;
       // Usar setTimeout para evitar el error de detección de cambios
       setTimeout(() => {
+        this.cdr.markForCheck();
         this.cdr.detectChanges();
       }, 0);
       console.log('✨ Loading finalizado. Estado:', { loading: this.loading, articulo: !!this.articulo });
+      
+      // Detener auto-recuperación si fue exitoso
+      if (this.articulo) {
+        this.detenerRecuperacionAutomatica();
+      }
+    }
+  }
+
+  // Métodos de auto-recuperación
+  private iniciarRecuperacionAutomatica() {
+    console.log('🔄 Iniciando mecanismo de auto-recuperación AGRESIVO para detalle');
+    
+    // Timer de timeout de seguridad (3 segundos - más agresivo)
+    this.timerTimeoutSeguridad = setTimeout(() => {
+      console.log('⚠️ Timeout de seguridad activado - forzando recuperación inmediata');
+      this.forzarRecuperacion();
+    }, 3000);
+
+    // Timer de verificación cada 1.5 segundos (más frecuente)
+    this.timerRecuperacion = setInterval(() => {
+      this.verificarEstadoYRecuperar();
+    }, 1500);
+
+    // Timer de backup que fuerza recuperación cada 5 segundos sin excepción
+    this.timerBackupRecuperacion = setInterval(() => {
+      console.log('🆘 RECUPERACIÓN DE EMERGENCIA - Forzando recarga');
+      if (!this.articulo && this.loading) {
+        this.forzarRecuperacionCompleta();
+      }
+    }, 5000);
+  }
+
+  private detenerRecuperacionAutomatica() {
+    console.log('✅ Deteniendo auto-recuperación - producto cargado exitosamente');
+    if (this.timerRecuperacion) {
+      clearInterval(this.timerRecuperacion);
+      this.timerRecuperacion = null;
+    }
+    if (this.timerTimeoutSeguridad) {
+      clearTimeout(this.timerTimeoutSeguridad);
+      this.timerTimeoutSeguridad = null;
+    }
+    if (this.timerBackupRecuperacion) {
+      clearInterval(this.timerBackupRecuperacion);
+      this.timerBackupRecuperacion = null;
+    }
+  }
+
+  private verificarEstadoYRecuperar() {
+    console.log('🔍 Verificando estado del componente:', {
+      loading: this.loading,
+      tieneArticulo: !!this.articulo,
+      intentos: this.intentosRecuperacion
+    });
+
+    // Si está cargando pero no hay artículo después de un tiempo
+    if (this.loading && !this.articulo) {
+      this.forzarRecuperacion();
+    }
+    
+    // Si ya tiene artículo, detener recuperación
+    if (this.articulo) {
+      this.detenerRecuperacionAutomatica();
+    }
+  }
+
+  private forzarRecuperacion() {
+    if (this.intentosRecuperacion >= this.maxIntentosRecuperacion) {
+      console.log('❌ Máximo de intentos de recuperación alcanzado');
+      this.detenerRecuperacionAutomatica();
+      return;
+    }
+
+    this.intentosRecuperacion++;
+    console.log(`🔄 Forzando recuperación - intento ${this.intentosRecuperacion}/${this.maxIntentosRecuperacion}`);
+
+    const articuloId = this.route.snapshot.paramMap.get('id');
+    if (articuloId) {
+      // Resetear estado y recargar
+      this.loading = true;
+      this.articulo = null;
+      this.cdr.markForCheck();
+      this.cdr.detectChanges();
+      
+      // Recargar con delay para evitar problemas
+      setTimeout(() => {
+        this.cargarArticulo(articuloId);
+      }, 500);
+    }
+  }
+
+  private forzarRecuperacionCompleta() {
+    console.log('🆘 RECUPERACIÓN COMPLETA DE EMERGENCIA');
+    const articuloId = this.route.snapshot.paramMap.get('id');
+    if (articuloId) {
+      // Resetear completamente el estado
+      this.loading = true;
+      this.articulo = null;
+      this.imagenesCarrusel = [];
+      this.imagenActualIndex = 0;
+      
+      // Forzar múltiples actualizaciones
+      this.cdr.markForCheck();
+      this.cdr.detectChanges();
+      setTimeout(() => this.cdr.detectChanges(), 100);
+      setTimeout(() => this.cdr.detectChanges(), 300);
+      
+      // Recargar inmediatamente
+      this.cargarArticulo(articuloId);
     }
   }
 
