@@ -340,12 +340,20 @@ export class ArticulosRuralesComponent implements OnInit {
 
       // Filtro por categoría
       if (this.filtros.categoria) {
-        if (articulo.categoria !== this.filtros.categoria) return false;
+        // Buscar la categoría por ID para obtener su nombre
+        const categoriaSeleccionada = this.categorias.find(cat => cat.id === this.filtros.categoria);
+        const nombreCategoria = categoriaSeleccionada?.nombre;
+        console.log('🔍 Comparando categoría del artículo:', articulo.categoria, 'con filtro:', nombreCategoria);
+        if (nombreCategoria && articulo.categoria !== nombreCategoria) return false;
       }
 
       // Filtro por marca
       if (this.filtros.marca) {
-        if (articulo.marca !== this.filtros.marca) return false;
+        // Buscar la marca por ID para obtener su nombre
+        const marcaSeleccionada = this.marcas.find(m => m.id === this.filtros.marca);
+        const nombreMarca = marcaSeleccionada?.nombre;
+        console.log('🔍 Comparando marca del artículo:', articulo.marca, 'con filtro:', nombreMarca);
+        if (nombreMarca && articulo.marca !== nombreMarca) return false;
       }
 
       // Filtro por precio
@@ -360,6 +368,11 @@ export class ArticulosRuralesComponent implements OnInit {
     });
 
     console.log('✅ Artículos filtrados:', this.articulosFiltrados.length);
+    console.log('📊 Artículos que pasaron el filtro:', this.articulosFiltrados.map(a => ({ 
+      nombre: a.nombre, 
+      categoria: a.categoria, 
+      marca: a.marca 
+    })));
     this.cdr.detectChanges(); // Forzar actualización después de filtrar
   }
 
