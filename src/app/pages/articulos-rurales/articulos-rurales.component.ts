@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -37,7 +37,8 @@ interface FiltrosArticulos {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './articulos-rurales.component.html',
-  styleUrl: './articulos-rurales.component.scss'
+  styleUrl: './articulos-rurales.component.scss',
+  changeDetection: ChangeDetectionStrategy.Default
 })
 export class ArticulosRuralesComponent implements OnInit {
   articulos: ArticuloRural[] = [];
@@ -68,25 +69,62 @@ export class ArticulosRuralesComponent implements OnInit {
       articulosFiltrados: this.articulosFiltrados.length
     });
     
+    // Resetear estado al inicio
+    this.articulos = [];
+    this.articulosFiltrados = [];
+    this.categorias = [];
+    this.marcas = [];
+    this.filtros = {};
+    this.busqueda = '';
+    this.cargando = true;
+    
+    // Forzar detección de cambios inicial con estrategia agresiva
+    this.cdr.markForCheck();
+    this.cdr.detectChanges();
+    
     this.cargarDatos();
+    
+    // Verificación automática del estado cada 2 segundos
+    const intervaloVerificacion = setInterval(() => {
+      if (this.cargando && this.articulos.length > 0 && this.articulosFiltrados.length > 0) {
+        console.log('🔧 AUTO-RECOVERY: Detectado estado inconsistente, corrigiendo...');
+        this.cargando = false;
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
+        clearInterval(intervaloVerificacion);
+      }
+    }, 2000);
+    
+    // Limpiar el intervalo después de 30 segundos
+    setTimeout(() => {
+      clearInterval(intervaloVerificacion);
+    }, 30000);
     
     // Timeout de seguridad para evitar loading infinito
     setTimeout(() => {
       if (this.cargando) {
-        console.warn('⚠️ Timeout de carga alcanzado, finalizando loading...');
+        console.warn('⚠️ Timeout de carga alcanzado, ejecutando recuperación...');
         console.warn('Estado al timeout:', {
           articulos: this.articulos.length,
           articulosFiltrados: this.articulosFiltrados.length
         });
-        this.cargando = false;
-        this.cdr.detectChanges(); // Forzar actualización en timeout
+        
+        // Usar método de recuperación
+        this.forzarRecuperacion();
       }
-    }, 10000); // 10 segundos máximo
+    }, 15000); // 15 segundos máximo (aumentado)
   }
 
   async cargarDatos() {
     console.log('🔄 Iniciando carga de datos...');
+    console.log('🔧 Estado antes de cargar:', {
+      cargando: this.cargando,
+      articulos: this.articulos.length,
+      articulosFiltrados: this.articulosFiltrados.length
+    });
+    
     this.cargando = true;
+    this.cdr.detectChanges(); // Asegurar que el loading se muestre
     
     try {
       // Paso 1: Verificar que el servicio esté disponible
@@ -136,12 +174,31 @@ export class ArticulosRuralesComponent implements OnInit {
       console.log('✅ Paso 4 completado. Artículos filtrados:', this.articulosFiltrados.length);
 
       // Paso 5: Finalizar carga principal
-      console.log('🔍 Paso 5: Finalizando carga...');
+      console.log('🔍 Paso 5: Finalizando carga principal...');
       this.cargando = false;
       
-      // Forzar detección de cambios
+      // Estrategia agresiva de detección de cambios
+      this.cdr.markForCheck();
       this.cdr.detectChanges();
+      
+      setTimeout(() => {
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
+        console.log('🔄 Detección de cambios adicional ejecutada');
+      }, 50);
+      
+      setTimeout(() => {
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
+        console.log('🔄 Detección de cambios (2do intento) ejecutada');
+      }, 200);
+      
       console.log('🎉 Carga principal completa. Mostrando', this.articulosFiltrados.length, 'productos');
+      console.log('🔧 Estado después de carga principal:', {
+        cargando: this.cargando,
+        articulos: this.articulos.length,
+        articulosFiltrados: this.articulosFiltrados.length
+      });
 
       // Paso 6: Cargar categorías y marcas (ahora que tenemos los productos)
       console.log('🔍 Paso 6: Iniciando carga de categorías y marcas...');
@@ -153,9 +210,9 @@ export class ArticulosRuralesComponent implements OnInit {
         console.error('❌ Stack trace:', error.stack);
       }
       this.cargando = false;
-      this.cdr.detectChanges(); // Forzar actualización también en error
       this.articulos = [];
       this.articulosFiltrados = [];
+      this.cdr.detectChanges(); // Forzar actualización también en error
     }
   }
 
@@ -293,14 +350,33 @@ export class ArticulosRuralesComponent implements OnInit {
 
   limpiarFiltros() {
     console.log('🧹 Limpiando filtros...');
+    console.log('🔧 Estado antes de limpiar:', {
+      cargando: this.cargando,
+      articulos: this.articulos.length,
+      articulosFiltrados: this.articulosFiltrados.length,
+      filtros: this.filtros
+    });
+    
     this.filtros = {};
     this.busqueda = '';
+    
     // Mostrar todos los productos cuando se limpian los filtros
-    if (!this.cargando && this.articulos.length > 0) {
+    if (this.articulos.length > 0) {
       this.articulosFiltrados = [...this.articulos];
+      this.cargando = false; // Asegurar que no esté cargando
       this.cdr.detectChanges(); // Forzar actualización
       console.log('📋 Mostrando todos los productos después de limpiar:', this.articulosFiltrados.length);
+    } else {
+      // Si no hay artículos, intentar recargar
+      console.log('⚠️ No hay artículos, intentando recargar...');
+      this.cargarDatos();
     }
+    
+    console.log('🔧 Estado después de limpiar:', {
+      cargando: this.cargando,
+      articulos: this.articulos.length,
+      articulosFiltrados: this.articulosFiltrados.length
+    });
   }
 
   toggleFiltros() {
@@ -352,5 +428,43 @@ export class ArticulosRuralesComponent implements OnInit {
 
   goBack() {
     this.router.navigate(['/']);
+  }
+
+  // Método de recuperación para problemas de estado
+  forzarRecuperacion() {
+    console.log('🛠️ RECOVERY: Forzando recuperación de estado');
+    console.log('🔧 Estado actual:', {
+      cargando: this.cargando,
+      articulos: this.articulos.length,
+      articulosFiltrados: this.articulosFiltrados.length
+    });
+    
+    // Si hay productos pero no están filtrados, restaurar
+    if (this.articulos.length > 0 && this.articulosFiltrados.length === 0) {
+      this.articulosFiltrados = [...this.articulos];
+      console.log('✅ RECOVERY: Productos restaurados');
+    }
+    
+    // Si está cargando indefinidamente, detener
+    if (this.cargando) {
+      this.cargando = false;
+      console.log('✅ RECOVERY: Loading detenido');
+    }
+    
+    // Estrategia agresiva de detección de cambios
+    this.cdr.markForCheck();
+    this.cdr.detectChanges();
+    
+    setTimeout(() => {
+      this.cdr.markForCheck();
+      this.cdr.detectChanges();
+      console.log('✅ RECOVERY: Vista actualizada');
+    }, 100);
+    
+    setTimeout(() => {
+      this.cdr.markForCheck();
+      this.cdr.detectChanges();
+      console.log('✅ RECOVERY: Vista actualizada (2do intento)');
+    }, 300);
   }
 }
