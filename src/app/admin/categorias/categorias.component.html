@@ -45,45 +45,92 @@
       <p>Cargando categorías...</p>
     </div>
 
-    <div class="categorias-grid" *ngIf="!loading">
-      <div class="categoria-card" *ngFor="let categoria of filteredCategorias">
-        <div class="categoria-header">
-          <div class="categoria-icon" [class.cerco]="categoria.tipo === 'cerco'" [class.rural]="categoria.tipo === 'rural'">
-            <span *ngIf="categoria.tipo === 'cerco'">🏠</span>
-            <span *ngIf="categoria.tipo === 'rural'">🌾</span>
-          </div>
-          <span class="tipo-badge" [class.cerco]="categoria.tipo === 'cerco'" [class.rural]="categoria.tipo === 'rural'">
-            {{ categoria.tipo === 'cerco' ? 'Cerco Perimetral' : 'Artículo Rural' }}
+    <!-- Tabla de Categorías -->
+    <div class="categorias-table-container" *ngIf="!loading && paginatedCategorias.length > 0">
+      <table class="categorias-table">
+        <thead>
+          <tr>
+            <th class="th-icon">Tipo</th>
+            <th class="th-nombre">Nombre</th>
+            <th class="th-descripcion">Descripción</th>
+            <th class="th-tipo">Categoría</th>
+            <th class="th-acciones">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let categoria of paginatedCategorias" class="categoria-row">
+            <td class="td-icon">
+              <div class="categoria-icon" [class.cerco]="categoria.tipo === 'cerco'" [class.rural]="categoria.tipo === 'rural'">
+                <span *ngIf="categoria.tipo === 'cerco'">🏠</span>
+                <span *ngIf="categoria.tipo === 'rural'">🌾</span>
+              </div>
+            </td>
+            <td class="td-nombre">
+              <span class="nombre-text">{{ categoria.nombre }}</span>
+            </td>
+            <td class="td-descripcion">
+              <span *ngIf="categoria.descripcion" class="descripcion-text">{{ categoria.descripcion }}</span>
+              <span *ngIf="!categoria.descripcion" class="descripcion-empty">Sin descripción</span>
+            </td>
+            <td class="td-tipo">
+              <span class="tipo-badge" [class.cerco]="categoria.tipo === 'cerco'" [class.rural]="categoria.tipo === 'rural'">
+                {{ categoria.tipo === 'cerco' ? 'Cerco Perimetral' : 'Artículo Rural' }}
+              </span>
+            </td>
+            <td class="td-acciones">
+              <div class="acciones-buttons">
+                <button class="btn-edit" (click)="openEditModal(categoria)" title="Editar">
+                  ✏️
+                </button>
+                <button class="btn-delete" (click)="openDeleteModal(categoria)" title="Eliminar">
+                  🗑️
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Paginador -->
+      <div class="pagination-container" *ngIf="totalPages > 1">
+        <button 
+          class="pagination-btn" 
+          (click)="previousPage()" 
+          [disabled]="currentPage === 1">
+          ← Anterior
+        </button>
+        
+        <div class="pagination-info">
+          <span class="page-numbers">
+            <button 
+              *ngFor="let page of getPageNumbers()" 
+              class="page-number" 
+              [class.active]="page === currentPage"
+              (click)="goToPage(page)">
+              {{ page }}
+            </button>
+          </span>
+          <span class="pagination-text">
+            Página {{ currentPage }} de {{ totalPages }} ({{ filteredCategorias.length }} categorías)
           </span>
         </div>
 
-        <div class="categoria-info">
-          <h3>{{ categoria.nombre }}</h3>
-          <p class="categoria-descripcion" *ngIf="categoria.descripcion">
-            {{ categoria.descripcion }}
-          </p>
-          <p class="categoria-descripcion empty" *ngIf="!categoria.descripcion">
-            Sin descripción
-          </p>
-        </div>
-
-        <div class="categoria-actions">
-          <button class="btn-edit" (click)="openEditModal(categoria)">
-            ✏️ Editar
-          </button>
-          <button class="btn-delete" (click)="openDeleteModal(categoria)">
-            🗑️ Eliminar
-          </button>
-        </div>
-      </div>
-
-      <div class="empty-state" *ngIf="filteredCategorias.length === 0">
-        <div class="empty-icon">📁</div>
-        <p>No se encontraron categorías</p>
-        <button class="btn-create-empty" (click)="openCreateModal()">
-          + Crear Primera Categoría
+        <button 
+          class="pagination-btn" 
+          (click)="nextPage()" 
+          [disabled]="currentPage === totalPages">
+          Siguiente →
         </button>
       </div>
+    </div>
+
+    <!-- Estado vacío -->
+    <div class="empty-state" *ngIf="!loading && filteredCategorias.length === 0">
+      <div class="empty-icon">📁</div>
+      <p>No se encontraron categorías</p>
+      <button class="btn-create-empty" (click)="openCreateModal()">
+        + Crear Primera Categoría
+      </button>
     </div>
   </div>
 

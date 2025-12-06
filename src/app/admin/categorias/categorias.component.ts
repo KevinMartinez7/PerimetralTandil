@@ -26,6 +26,10 @@ export class CategoriasComponent implements OnInit {
   searchTerm = '';
   selectedTipo: 'cerco' | 'rural' | '' = '';
 
+  // Paginación
+  currentPage = 1;
+  itemsPerPage = 10;
+
   // Categoría actual para editar/crear
   currentCategoria: Categoria = {
     nombre: '',
@@ -85,6 +89,63 @@ export class CategoriasComponent implements OnInit {
       const matchTipo = !this.selectedTipo || cat.tipo === this.selectedTipo;
       return matchSearch && matchTipo;
     });
+  }
+
+  get totalPages() {
+    return Math.ceil(this.filteredCategorias.length / this.itemsPerPage);
+  }
+
+  get paginatedCategorias() {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    return this.filteredCategorias.slice(startIndex, endIndex);
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxVisiblePages = 5;
+    
+    if (this.totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (this.currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push(this.totalPages);
+      } else if (this.currentPage >= this.totalPages - 2) {
+        pages.push(1);
+        for (let i = this.totalPages - 3; i <= this.totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push(this.currentPage - 1);
+        pages.push(this.currentPage);
+        pages.push(this.currentPage + 1);
+        pages.push(this.totalPages);
+      }
+    }
+    
+    return pages;
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+    }
+  }
+
+  goToPage(page: number) {
+    this.currentPage = page;
   }
 
   openCreateModal() {
