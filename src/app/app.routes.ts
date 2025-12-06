@@ -32,6 +32,10 @@ export const routes: Routes = [
         path: 'categorias', 
         loadComponent: () => import('./admin/categorias/categorias.component').then(m => m.CategoriasComponent)
       },
+      { 
+        path: 'marcas', 
+        loadComponent: () => import('./admin/marcas/marcas.component').then(m => m.MarcasComponent)
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },

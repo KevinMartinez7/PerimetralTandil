@@ -38,6 +38,7 @@ export interface Categoria {
 export interface Marca {
   id?: string;
   nombre: string;
+  slug?: string;
   logo_url?: string;
 }
 

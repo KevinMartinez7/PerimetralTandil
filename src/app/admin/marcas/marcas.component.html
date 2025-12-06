@@ -1,0 +1,208 @@
+<div class="marcas-container">
+  <!-- Header -->
+  <header class="admin-header">
+    <div class="header-content">
+      <div class="header-left">
+        <a routerLink="/admin/dashboard" class="back-btn">← Volver</a>
+        <h1>Gestión de Marcas</h1>
+      </div>
+      <div class="header-right">
+        <button class="btn-primary" (click)="openCreateModal()">
+          + Nueva Marca
+        </button>
+        <button class="btn-logout" (click)="logout()">
+          Cerrar Sesión
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Filtros -->
+  <div class="filters-section">
+    <div class="filters-content">
+      <div class="filter-group">
+        <input
+          type="text"
+          placeholder="Buscar marcas..."
+          [(ngModel)]="searchTerm"
+          class="search-input"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de Marcas -->
+  <div class="marcas-content">
+    <div class="loading-state" *ngIf="loading">
+      <p>Cargando marcas...</p>
+    </div>
+
+    <!-- Tabla de Marcas -->
+    <div class="marcas-table-container" *ngIf="!loading && paginatedMarcas.length > 0">
+      <table class="marcas-table">
+        <thead>
+          <tr>
+            <th class="th-icon">Icono</th>
+            <th class="th-nombre">Nombre</th>
+            <th class="th-logo">Logo URL</th>
+            <th class="th-acciones">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let marca of paginatedMarcas" class="marca-row">
+            <td class="td-icon">
+              <div class="marca-icon">
+                <span>🏷️</span>
+              </div>
+            </td>
+            <td class="td-nombre">
+              <span class="nombre-text">{{ marca.nombre }}</span>
+            </td>
+            <td class="td-logo">
+              <span *ngIf="marca.logo_url" class="logo-text">{{ marca.logo_url }}</span>
+              <span *ngIf="!marca.logo_url" class="logo-empty">Sin logo</span>
+            </td>
+            <td class="td-acciones">
+              <div class="acciones-buttons">
+                <button class="btn-edit" (click)="openEditModal(marca)" title="Editar">
+                  ✏️
+                </button>
+                <button class="btn-delete" (click)="openDeleteModal(marca)" title="Eliminar">
+                  🗑️
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Paginador -->
+      <div class="pagination-container" *ngIf="totalPages > 1">
+        <button 
+          class="pagination-btn" 
+          (click)="previousPage()" 
+          [disabled]="currentPage === 1">
+          ← Anterior
+        </button>
+        
+        <div class="pagination-info">
+          <span class="page-numbers">
+            <button 
+              *ngFor="let page of getPageNumbers()" 
+              class="page-number" 
+              [class.active]="page === currentPage"
+              (click)="goToPage(page)">
+              {{ page }}
+            </button>
+          </span>
+          <span class="pagination-text">
+            Página {{ currentPage }} de {{ totalPages }} ({{ filteredMarcas.length }} marcas)
+          </span>
+        </div>
+
+        <button 
+          class="pagination-btn" 
+          (click)="nextPage()" 
+          [disabled]="currentPage === totalPages">
+          Siguiente →
+        </button>
+      </div>
+    </div>
+
+    <!-- Estado vacío -->
+    <div class="empty-state" *ngIf="!loading && filteredMarcas.length === 0">
+      <div class="empty-icon">🏷️</div>
+      <p>No se encontraron marcas</p>
+      <button class="btn-create-empty" (click)="openCreateModal()">
+        + Crear Primera Marca
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal Crear/Editar -->
+  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ editMode ? 'Editar Marca' : 'Nueva Marca' }}</h2>
+        <button class="close-btn" (click)="closeModal()">×</button>
+      </div>
+
+      <form class="marca-form">
+        <div class="form-group">
+          <label for="nombre">Nombre de la Marca *</label>
+          <input
+            type="text"
+            id="nombre"
+            [(ngModel)]="currentMarca.nombre"
+            name="nombre"
+            placeholder="Ej: Acindar, Sima, MetalPro..."
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="logo_url">Logo URL (Opcional)</label>
+          <input
+            type="text"
+            id="logo_url"
+            [(ngModel)]="currentMarca.logo_url"
+            name="logo_url"
+            placeholder="https://ejemplo.com/logo.png"
+          />
+          <small class="field-info">
+            URL de la imagen del logo de la marca
+          </small>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="closeModal()">
+            Cancelar
+          </button>
+          <button type="button" class="btn-save" (click)="saveMarca()">
+            {{ editMode ? 'Actualizar' : 'Crear' }} Marca
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de Confirmación de Eliminación -->
+  <div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
+    <div class="modal-delete" (click)="$event.stopPropagation()">
+      <div class="modal-delete-icon">
+        <span>⚠️</span>
+      </div>
+      <h2 class="modal-delete-title">¿Estás seguro de que deseas eliminar esta marca?</h2>
+      <p class="modal-delete-text" *ngIf="marcaToDelete">
+        Se eliminará permanentemente la marca <strong>"{{ marcaToDelete.nombre }}"</strong>.
+        <br><br>
+        <span class="warning-text">⚠️ Nota: No podrás eliminar esta marca si tiene productos asociados.</span>
+      </p>
+      <div class="modal-delete-actions">
+        <button type="button" class="btn-delete-cancel" (click)="closeDeleteModal()">
+          Cancelar
+        </button>
+        <button type="button" class="btn-delete-confirm" (click)="confirmDelete()">
+          Sí, eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Éxito -->
+  <div class="modal-overlay" *ngIf="showSuccessModal" (click)="closeSuccessModal()">
+    <div class="modal-success" (click)="$event.stopPropagation()">
+      <div class="modal-success-icon">
+        <span>✓</span>
+      </div>
+      <h2 class="modal-success-title">¡Operación Exitosa!</h2>
+      <p class="modal-success-text">
+        {{ successMessage }}
+      </p>
+      <div class="modal-success-actions">
+        <button type="button" class="btn-success-ok" (click)="closeSuccessModal()">
+          Entendido
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
