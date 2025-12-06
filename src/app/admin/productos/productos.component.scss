@@ -986,6 +986,90 @@
   }
 }
 
+// Modal de éxito
+.modal-success {
+  background: white;
+  border-radius: 20px;
+  max-width: 500px;
+  width: 100%;
+  padding: 40px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  animation: modalSlideIn 0.3s ease-out;
+
+  .modal-success-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+    animation: successPulse 0.6s ease-in-out;
+
+    span {
+      display: inline-block;
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      font-weight: 900;
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+    }
+  }
+
+  .modal-success-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #10b981;
+    margin: 0 0 15px 0;
+    line-height: 1.4;
+  }
+
+  .modal-success-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 17px;
+    color: #666;
+    margin: 0 0 30px 0;
+    line-height: 1.6;
+    font-weight: 500;
+
+    strong {
+      color: #10b981;
+      font-weight: 700;
+    }
+  }
+
+  .modal-success-actions {
+    display: flex;
+    justify-content: center;
+
+    button {
+      padding: 12px 40px;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 160px;
+    }
+
+    .btn-success-ok {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+
+      &:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+      }
+    }
+  }
+}
+
 @keyframes modalSlideIn {
   from {
     opacity: 0;
@@ -1003,6 +1087,20 @@
   }
   50% {
     transform: scale(1.1);
+  }
+}
+
+@keyframes successPulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
   }
 }
 

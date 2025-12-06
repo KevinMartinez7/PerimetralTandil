@@ -398,4 +398,22 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal de Éxito -->
+  <div class="modal-overlay" *ngIf="showSuccessModal" (click)="closeSuccessModal()">
+    <div class="modal-success" (click)="$event.stopPropagation()">
+      <div class="modal-success-icon">
+        <span>✓</span>
+      </div>
+      <h2 class="modal-success-title">¡Operación Exitosa!</h2>
+      <p class="modal-success-text">
+        {{ successMessage }}
+      </p>
+      <div class="modal-success-actions">
+        <button type="button" class="btn-success-ok" (click)="closeSuccessModal()">
+          Entendido
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

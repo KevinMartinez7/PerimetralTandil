@@ -21,6 +21,8 @@ export class ProductosComponent implements OnInit {
   editMode = false;
   showDeleteModal = false;
   productoToDelete: any = null;
+  showSuccessModal = false;
+  successMessage = '';
   
   // Filtros
   searchTerm = '';
@@ -252,11 +254,15 @@ export class ProductosComponent implements OnInit {
         if (index !== -1) {
           this.productos[index] = { ...this.currentProducto };
         }
+        
+        this.successMessage = `Producto "${this.currentProducto.nombre}" actualizado exitosamente`;
       } else {
         const nuevoProducto = await this.productosService.createProducto(this.currentProducto);
         
         // Agregar el nuevo producto al array local
         this.productos.push(nuevoProducto);
+        
+        this.successMessage = `Producto "${nuevoProducto.nombre}" creado exitosamente`;
       }
       
       this.closeModal();
@@ -264,6 +270,15 @@ export class ProductosComponent implements OnInit {
       // Limpiar preview
       this.selectedFile = null;
       this.imagePreview = null;
+      
+      // Mostrar modal de éxito
+      this.showSuccessModal = true;
+      
+      // Cerrar automáticamente después de 3 segundos
+      setTimeout(() => {
+        this.showSuccessModal = false;
+        this.cdr.detectChanges();
+      }, 3000);
       
       this.cdr.detectChanges();
     } catch (error: any) {
@@ -456,6 +471,10 @@ export class ProductosComponent implements OnInit {
 
   removeCaracteristica(caracteristica: string) {
     this.caracteristicasVisuales = this.caracteristicasVisuales.filter(c => c !== caracteristica);
+  }
+
+  closeSuccessModal() {
+    this.showSuccessModal = false;
   }
 
   logout() {
