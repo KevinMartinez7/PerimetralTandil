@@ -1,0 +1,195 @@
+<div class="categorias-container">
+  <!-- Header -->
+  <header class="admin-header">
+    <div class="header-content">
+      <div class="header-left">
+        <a routerLink="/admin/dashboard" class="back-btn">← Volver</a>
+        <h1>Gestión de Categorías</h1>
+      </div>
+      <div class="header-right">
+        <button class="btn-primary" (click)="openCreateModal()">
+          + Nueva Categoría
+        </button>
+        <button class="btn-logout" (click)="logout()">
+          Cerrar Sesión
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Filtros -->
+  <div class="filters-section">
+    <div class="filters-content">
+      <div class="filter-group">
+        <input
+          type="text"
+          placeholder="Buscar categorías..."
+          [(ngModel)]="searchTerm"
+          class="search-input"
+        />
+      </div>
+
+      <div class="filter-group">
+        <select [(ngModel)]="selectedTipo" class="filter-select">
+          <option value="">Todos los tipos</option>
+          <option value="cerco">Cercos Perimetrales</option>
+          <option value="rural">Artículos Rurales</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de Categorías -->
+  <div class="categorias-content">
+    <div class="loading-state" *ngIf="loading">
+      <p>Cargando categorías...</p>
+    </div>
+
+    <div class="categorias-grid" *ngIf="!loading">
+      <div class="categoria-card" *ngFor="let categoria of filteredCategorias">
+        <div class="categoria-header">
+          <div class="categoria-icon" [class.cerco]="categoria.tipo === 'cerco'" [class.rural]="categoria.tipo === 'rural'">
+            <span *ngIf="categoria.tipo === 'cerco'">🏠</span>
+            <span *ngIf="categoria.tipo === 'rural'">🌾</span>
+          </div>
+          <span class="tipo-badge" [class.cerco]="categoria.tipo === 'cerco'" [class.rural]="categoria.tipo === 'rural'">
+            {{ categoria.tipo === 'cerco' ? 'Cerco Perimetral' : 'Artículo Rural' }}
+          </span>
+        </div>
+
+        <div class="categoria-info">
+          <h3>{{ categoria.nombre }}</h3>
+          <p class="categoria-descripcion" *ngIf="categoria.descripcion">
+            {{ categoria.descripcion }}
+          </p>
+          <p class="categoria-descripcion empty" *ngIf="!categoria.descripcion">
+            Sin descripción
+          </p>
+        </div>
+
+        <div class="categoria-actions">
+          <button class="btn-edit" (click)="openEditModal(categoria)">
+            ✏️ Editar
+          </button>
+          <button class="btn-delete" (click)="openDeleteModal(categoria)">
+            🗑️ Eliminar
+          </button>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="filteredCategorias.length === 0">
+        <div class="empty-icon">📁</div>
+        <p>No se encontraron categorías</p>
+        <button class="btn-create-empty" (click)="openCreateModal()">
+          + Crear Primera Categoría
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Crear/Editar -->
+  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ editMode ? 'Editar Categoría' : 'Nueva Categoría' }}</h2>
+        <button class="close-btn" (click)="closeModal()">×</button>
+      </div>
+
+      <form (ngSubmit)="saveCategoria()" class="categoria-form">
+        <div class="form-group">
+          <label for="nombre">Nombre de la Categoría *</label>
+          <input
+            type="text"
+            id="nombre"
+            [(ngModel)]="currentCategoria.nombre"
+            name="nombre"
+            placeholder="Ej: Alambrados, Tranqueras, Portones..."
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="tipo">Tipo de Categoría *</label>
+          <select
+            id="tipo"
+            [(ngModel)]="currentCategoria.tipo"
+            name="tipo"
+            required
+          >
+            <option value="cerco">🏠 Cercos Perimetrales (Urbano/Ciudad)</option>
+            <option value="rural">🌾 Artículos Rurales (Campo)</option>
+          </select>
+          <small class="tipo-info">
+            <span *ngIf="currentCategoria.tipo === 'cerco'" class="badge-cerco">
+              Esta categoría aparecerá en la sección de Cercos Perimetrales
+            </span>
+            <span *ngIf="currentCategoria.tipo === 'rural'" class="badge-rural">
+              Esta categoría aparecerá en la sección de Artículos Rurales
+            </span>
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label for="descripcion">Descripción (Opcional)</label>
+          <textarea
+            id="descripcion"
+            [(ngModel)]="currentCategoria.descripcion"
+            name="descripcion"
+            rows="4"
+            placeholder="Describe brevemente esta categoría..."
+          ></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="closeModal()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn-save">
+            {{ editMode ? 'Actualizar' : 'Crear' }} Categoría
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de Confirmación de Eliminación -->
+  <div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
+    <div class="modal-delete" (click)="$event.stopPropagation()">
+      <div class="modal-delete-icon">
+        <span>⚠️</span>
+      </div>
+      <h2 class="modal-delete-title">¿Estás seguro de que deseas eliminar esta categoría?</h2>
+      <p class="modal-delete-text" *ngIf="categoriaToDelete">
+        Se eliminará permanentemente la categoría <strong>"{{ categoriaToDelete.nombre }}"</strong>.
+        <br><br>
+        <span class="warning-text">⚠️ Nota: No podrás eliminar esta categoría si tiene productos asociados.</span>
+      </p>
+      <div class="modal-delete-actions">
+        <button type="button" class="btn-delete-cancel" (click)="closeDeleteModal()">
+          Cancelar
+        </button>
+        <button type="button" class="btn-delete-confirm" (click)="confirmDelete()">
+          Sí, eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Éxito -->
+  <div class="modal-overlay" *ngIf="showSuccessModal" (click)="closeSuccessModal()">
+    <div class="modal-success" (click)="$event.stopPropagation()">
+      <div class="modal-success-icon">
+        <span>✓</span>
+      </div>
+      <h2 class="modal-success-title">¡Operación Exitosa!</h2>
+      <p class="modal-success-text">
+        {{ successMessage }}
+      </p>
+      <div class="modal-success-actions">
+        <button type="button" class="btn-success-ok" (click)="closeSuccessModal()">
+          Entendido
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

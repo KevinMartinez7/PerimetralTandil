@@ -31,6 +31,7 @@ export interface Categoria {
   id?: string;
   nombre: string;
   tipo: 'cerco' | 'rural';
+  slug?: string;
   descripcion?: string;
 }
 

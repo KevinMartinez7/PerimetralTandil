@@ -130,7 +130,7 @@ export class CercosPerimetralesComponent implements OnInit {
       console.log('📦 Categorías recibidas:', categoriasData?.length || 0);
       console.log('📦 Marcas recibidas:', marcasData?.length || 0);
 
-      // Procesar categorías
+      // Procesar categorías - MOSTRAR TODAS, incluso sin productos
       this.categorias = (categoriasData || []).map(cat => {
         const cantidad = this.articulos.filter(a => 
           a.categoria === cat.nombre || a.categoria === cat.id
@@ -142,9 +142,10 @@ export class CercosPerimetralesComponent implements OnInit {
           slug: cat.nombre.toLowerCase().replace(/\s+/g, '-'),
           cantidad: cantidad
         };
-      }).filter(cat => cat.cantidad > 0);
+      });
+      // NO filtrar categorías sin productos para que aparezcan todas
 
-      // Procesar marcas
+      // Procesar marcas - MOSTRAR TODAS, incluso sin productos
       this.marcas = (marcasData || []).map(marca => {
         const cantidad = this.articulos.filter(a => 
           a.marca === marca.nombre || a.marca === marca.id
@@ -155,7 +156,8 @@ export class CercosPerimetralesComponent implements OnInit {
           nombre: marca.nombre,
           cantidad: cantidad
         };
-      }).filter(marca => marca.cantidad > 0);
+      });
+      // NO filtrar marcas sin productos para que aparezcan todas
 
       console.log('✅ Categorías procesadas:', this.categorias.length);
       console.log('✅ Marcas procesadas:', this.marcas.length);

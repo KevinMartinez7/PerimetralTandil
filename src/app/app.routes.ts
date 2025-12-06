@@ -28,6 +28,10 @@ export const routes: Routes = [
         path: 'productos', 
         loadComponent: () => import('./admin/productos/productos.component').then(m => m.ProductosComponent)
       },
+      { 
+        path: 'categorias', 
+        loadComponent: () => import('./admin/categorias/categorias.component').then(m => m.CategoriasComponent)
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
