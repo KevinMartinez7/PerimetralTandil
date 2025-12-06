@@ -24,6 +24,7 @@ export class MarcasComponent implements OnInit {
   
   // Filtros
   searchTerm = '';
+  filterTipo: 'todas' | 'cerco' | 'rural' | 'ambas' = 'todas';
 
   // Paginación
   currentPage = 1;
@@ -32,6 +33,7 @@ export class MarcasComponent implements OnInit {
   // Marca actual para editar/crear
   currentMarca: Marca = {
     nombre: '',
+    tipo: 'ambas',
     logo_url: ''
   };
 
@@ -84,7 +86,8 @@ export class MarcasComponent implements OnInit {
   get filteredMarcas() {
     return this.marcas.filter(marca => {
       const matchSearch = marca.nombre.toLowerCase().includes(this.searchTerm.toLowerCase());
-      return matchSearch;
+      const matchTipo = this.filterTipo === 'todas' || marca.tipo === this.filterTipo;
+      return matchSearch && matchTipo;
     });
   }
 
@@ -149,6 +152,7 @@ export class MarcasComponent implements OnInit {
     this.editMode = false;
     this.currentMarca = {
       nombre: '',
+      tipo: 'ambas',
       logo_url: ''
     };
     this.showModal = true;
@@ -164,6 +168,7 @@ export class MarcasComponent implements OnInit {
     this.showModal = false;
     this.currentMarca = {
       nombre: '',
+      tipo: 'ambas',
       logo_url: ''
     };
   }
@@ -184,6 +189,11 @@ export class MarcasComponent implements OnInit {
         .replace(/^-+|-+$/g, ''); // Eliminar guiones al inicio y final
       
       this.currentMarca.slug = slug;
+      
+      // Asegurar que tipo tenga un valor válido
+      if (!this.currentMarca.tipo) {
+        this.currentMarca.tipo = 'ambas';
+      }
 
       console.log('💾 Guardando marca:', this.currentMarca);
 

@@ -39,6 +39,7 @@ export interface Marca {
   id?: string;
   nombre: string;
   slug?: string;
+  tipo?: 'cerco' | 'rural' | 'ambas';
   logo_url?: string;
 }
 

@@ -20,13 +20,23 @@
   <!-- Filtros -->
   <div class="filters-section">
     <div class="filters-content">
-      <div class="filter-group">
-        <input
-          type="text"
-          placeholder="Buscar marcas..."
-          [(ngModel)]="searchTerm"
-          class="search-input"
-        />
+      <div class="filters-row">
+        <div class="filter-group">
+          <input
+            type="text"
+            placeholder="Buscar marcas..."
+            [(ngModel)]="searchTerm"
+            class="search-input"
+          />
+        </div>
+        <div class="filter-group">
+          <select [(ngModel)]="filterTipo" class="filter-select">
+            <option value="todas">Todas las categorías</option>
+            <option value="cerco">🏠 Cercos Perimetrales</option>
+            <option value="rural">🌾 Artículos Rurales</option>
+            <option value="ambas">🏠🌾 Ambas</option>
+          </select>
+        </div>
       </div>
     </div>
   </div>
@@ -44,6 +54,7 @@
           <tr>
             <th class="th-icon">Icono</th>
             <th class="th-nombre">Nombre</th>
+            <th class="th-tipo">Tipo</th>
             <th class="th-logo">Logo URL</th>
             <th class="th-acciones">Acciones</th>
           </tr>
@@ -57,6 +68,18 @@
             </td>
             <td class="td-nombre">
               <span class="nombre-text">{{ marca.nombre }}</span>
+            </td>
+            <td class="td-tipo">
+              <span class="tipo-badge" [ngClass]="{
+                'tipo-cerco': marca.tipo === 'cerco',
+                'tipo-rural': marca.tipo === 'rural',
+                'tipo-ambas': marca.tipo === 'ambas'
+              }">
+                <span *ngIf="marca.tipo === 'cerco'">🏠 Cercos</span>
+                <span *ngIf="marca.tipo === 'rural'">🌾 Rurales</span>
+                <span *ngIf="marca.tipo === 'ambas'">🏠🌾 Ambas</span>
+                <span *ngIf="!marca.tipo">🏠🌾 Ambas</span>
+              </span>
             </td>
             <td class="td-logo">
               <span *ngIf="marca.logo_url" class="logo-text">{{ marca.logo_url }}</span>
@@ -137,6 +160,23 @@
             name="nombre"
             placeholder="Ej: Acindar, Sima, MetalPro..."
           />
+        </div>
+
+        <div class="form-group">
+          <label for="tipo">Categoría *</label>
+          <select
+            id="tipo"
+            [(ngModel)]="currentMarca.tipo"
+            name="tipo"
+            class="form-select"
+          >
+            <option value="ambas">🏠🌾 Ambas (Cercos y Rurales)</option>
+            <option value="cerco">🏠 Cercos Perimetrales</option>
+            <option value="rural">🌾 Artículos Rurales</option>
+          </select>
+          <small class="field-info">
+            Selecciona en qué sección aparecerá esta marca. Por defecto aparece en ambas.
+          </small>
         </div>
 
         <div class="form-group">

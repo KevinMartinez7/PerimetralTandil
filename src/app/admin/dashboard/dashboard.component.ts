@@ -1,4 +1,4 @@
-import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
+import { Component, OnInit, PLATFORM_ID, Inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { SupabaseService } from '../../core/services/supabase.service';
@@ -30,6 +30,7 @@ export class DashboardComponent implements OnInit {
   constructor(
     private supabaseService: SupabaseService,
     private router: Router,
+    private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -48,28 +49,64 @@ export class DashboardComponent implements OnInit {
   }
 
   async loadStats() {
+    this.loading = true;
+    
     try {
-      // Cargar estadísticas desde Supabase
-      const [productos, categorias, marcas] = await Promise.all([
+      console.log('🔄 Cargando estadísticas del dashboard...');
+      
+      // Cargar estadísticas desde Supabase con timeout
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout')), 10000)
+      );
+
+      const statsPromise = Promise.all([
         this.supabaseService.client.from('productos').select('id, activo'),
         this.supabaseService.client.from('categorias').select('id'),
         this.supabaseService.client.from('marcas').select('id')
       ]);
 
-      if (productos.data) {
+      const [productos, categorias, marcas] = await Promise.race([
+        statsPromise,
+        timeoutPromise
+      ]) as any[];
+
+      console.log('✅ Datos recibidos:', { 
+        productos: productos?.data?.length, 
+        categorias: categorias?.data?.length, 
+        marcas: marcas?.data?.length 
+      });
+
+      if (productos?.data) {
         this.stats.totalProductos = productos.data.length;
-        this.stats.productosActivos = productos.data.filter(p => p.activo).length;
+        this.stats.productosActivos = productos.data.filter((p: any) => p.activo).length;
       }
-      if (categorias.data) {
+      if (categorias?.data) {
         this.stats.totalCategorias = categorias.data.length;
       }
-      if (marcas.data) {
+      if (marcas?.data) {
         this.stats.totalMarcas = marcas.data.length;
       }
-    } catch (error) {
-      console.error('Error al cargar estadísticas:', error);
+
+      console.log('✅ Estadísticas cargadas:', this.stats);
+    } catch (error: any) {
+      console.error('❌ Error al cargar estadísticas:', error);
+      
+      // Valores por defecto en caso de error
+      this.stats = {
+        totalProductos: 0,
+        productosActivos: 0,
+        totalCategorias: 0,
+        totalMarcas: 0
+      };
+      
+      // Si hay timeout o error, mostrar mensaje
+      if (error.message === 'Timeout') {
+        console.warn('⏱️ Timeout al cargar estadísticas, mostrando valores por defecto');
+      }
     } finally {
       this.loading = false;
+      console.log('✅ Loading = false');
+      this.cdr.detectChanges();
     }
   }
 
