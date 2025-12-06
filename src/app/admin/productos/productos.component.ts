@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -58,7 +58,8 @@ export class ProductosComponent implements OnInit {
   constructor(
     private productosService: ProductosService,
     private supabaseService: SupabaseService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   async ngOnInit() {
@@ -67,6 +68,8 @@ export class ProductosComponent implements OnInit {
 
   async loadData() {
     this.loading = true;
+    this.cdr.detectChanges(); // Forzar actualización para mostrar loading
+    
     try {
       console.log('🔄 Iniciando carga de datos...');
       
@@ -93,7 +96,15 @@ export class ProductosComponent implements OnInit {
       console.error('❌ Error al cargar datos:', error);
     } finally {
       this.loading = false;
-      console.log('✓ Carga completada');
+      // Forzar detección de cambios múltiples veces para asegurar renderizado
+      this.cdr.detectChanges();
+      setTimeout(() => {
+        this.cdr.detectChanges();
+      }, 0);
+      setTimeout(() => {
+        this.cdr.detectChanges();
+      }, 100);
+      console.log('✓ Carga completada. Loading:', this.loading, 'Productos:', this.productos.length);
     }
   }
 
