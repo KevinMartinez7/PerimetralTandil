@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef, PLATFORM_ID, Inject } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { ProductosService, Producto, Categoria, Marca } from '../../core/services/productos.service';
@@ -61,21 +61,26 @@ export class ProductosComponent implements OnInit {
     private productosService: ProductosService,
     private supabaseService: SupabaseService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
-    // Verificar autenticación en el constructor (protección adicional)
-    if (!this.supabaseService.isAuthenticated()) {
-      console.log('⚠️ ProductosComponent: Usuario no autenticado, redirigiendo a login');
-      this.router.navigate(['/admin/login']);
+    // Solo verificar autenticación en el navegador, no en el servidor
+    if (isPlatformBrowser(this.platformId)) {
+      if (!this.supabaseService.isAuthenticated()) {
+        console.log('⚠️ ProductosComponent: Usuario no autenticado en navegador, redirigiendo a login');
+        this.router.navigate(['/admin/login']);
+      }
     }
   }
 
   async ngOnInit() {
-    // Verificar autenticación nuevamente al inicializar
-    if (!this.supabaseService.isAuthenticated()) {
-      console.log('⚠️ ProductosComponent.ngOnInit: Usuario no autenticado, redirigiendo a login');
-      this.router.navigate(['/admin/login']);
-      return;
+    // Solo verificar autenticación en el navegador
+    if (isPlatformBrowser(this.platformId)) {
+      if (!this.supabaseService.isAuthenticated()) {
+        console.log('⚠️ ProductosComponent.ngOnInit: Usuario no autenticado en navegador, redirigiendo a login');
+        this.router.navigate(['/admin/login']);
+        return;
+      }
     }
     
     await this.loadData();

@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { SupabaseService } from '../../core/services/supabase.service';
 
@@ -29,10 +29,20 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private supabaseService: SupabaseService,
-    private router: Router
+    private router: Router,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   async ngOnInit() {
+    // Solo verificar autenticación en el navegador
+    if (isPlatformBrowser(this.platformId)) {
+      if (!this.supabaseService.isAuthenticated()) {
+        console.log('⚠️ DashboardComponent: Usuario no autenticado en navegador, redirigiendo a login');
+        this.router.navigate(['/admin/login']);
+        return;
+      }
+    }
+    
     this.userName = this.supabaseService.currentUserValue?.email || 'Administrador';
     await this.loadStats();
   }
