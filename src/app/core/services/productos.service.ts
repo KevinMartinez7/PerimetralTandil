@@ -50,11 +50,11 @@ export class ProductosService {
   async getProductos(tipo?: 'cerco' | 'rural') {
     console.log('📞 ProductosService.getProductos() llamado con tipo:', tipo);
     
-    // Primero intentar sin joins para evitar errores de schema
+    // IMPORTANTE: NO filtrar por activo para mostrar todos los productos en el admin
+    // Los productos inactivos se mostrarán grises en la UI
     let query = this.supabase.client
       .from('productos')
-      .select('*')
-      .eq('activo', true);
+      .select('*');
 
     if (tipo) {
       query = query.eq('tipo', tipo);

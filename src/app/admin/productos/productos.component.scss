@@ -143,10 +143,74 @@
   overflow: hidden;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
+  position: relative;
 
   &:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  // Estilos para productos inactivos
+  &.inactive {
+    opacity: 0.5;
+    filter: grayscale(100%);
+    position: relative;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.6);
+      z-index: 5;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    &::after {
+      content: '✓ HABILITAR';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 12px 30px;
+      border-radius: 8px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      z-index: 10;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+      cursor: pointer;
+    }
+
+    &:hover::after {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.05);
+    }
+
+    &:hover::before {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    &:hover {
+      opacity: 0.7;
+      cursor: pointer;
+      transform: translateY(-3px);
+    }
+
+    // Deshabilitar el hover normal de las cards inactivas
+    .producto-actions {
+      pointer-events: auto;
+      z-index: 15;
+      position: relative;
+    }
   }
 
   .producto-image {

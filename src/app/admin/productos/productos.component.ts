@@ -128,6 +128,8 @@ export class ProductosComponent implements OnInit {
       const matchSearch = p.nombre.toLowerCase().includes(this.searchTerm.toLowerCase());
       const matchCategoria = !this.selectedCategoria || p.categoria === this.selectedCategoria;
       const matchTipo = !this.selectedTipo || p.tipo === this.selectedTipo;
+      // IMPORTANTE: Mostrar TODOS los productos (activos e inactivos)
+      // Los inactivos se verán grises y deshabilitados por CSS
       return matchSearch && matchCategoria && matchTipo;
     });
   }

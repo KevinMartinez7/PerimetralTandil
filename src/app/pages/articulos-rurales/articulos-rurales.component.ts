@@ -168,20 +168,22 @@ export class ArticulosRuralesComponent implements OnInit {
         return;
       }
 
-      // Paso 3: Transformar productos
-      console.log('� Paso 3: Transformando productos...');
-      this.articulos = productos.map((p, index) => {
-        console.log(`  - Procesando producto ${index + 1}:`, p.nombre);
-        return {
-          ...p,
-          imagen: (p.imagenes && p.imagenes[0]) || '/imagenes/no-image.png',
-          categoria: p.categoria || '',
-          marca: p.marca || '',
-          en_oferta: p.en_oferta || false,
-          precio_original: p.precio_original,
-          caracteristicas: Array.isArray(p.caracteristicas) ? p.caracteristicas : []
-        } as ArticuloRural;
-      });
+      // Paso 3: Transformar productos - SOLO MOSTRAR PRODUCTOS ACTIVOS en la página pública
+      console.log('🔍 Paso 3: Transformando productos...');
+      this.articulos = productos
+        .filter(p => p.activo === true) // Filtrar solo productos activos
+        .map((p, index) => {
+          console.log(`  - Procesando producto ${index + 1}:`, p.nombre);
+          return {
+            ...p,
+            imagen: (p.imagenes && p.imagenes[0]) || '/imagenes/no-image.png',
+            categoria: p.categoria || '',
+            marca: p.marca || '',
+            en_oferta: p.en_oferta || false,
+            precio_original: p.precio_original,
+            caracteristicas: Array.isArray(p.caracteristicas) ? p.caracteristicas : []
+          } as ArticuloRural;
+        });
 
       console.log('✅ Paso 3 completado. Artículos procesados:', this.articulos.length);
 

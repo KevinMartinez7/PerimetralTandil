@@ -85,18 +85,20 @@ export class CercosPerimetralesComponent implements OnInit {
         return;
       }
 
-      // Transformar productos
-      this.articulos = productos.map(p => ({
-        ...p,
-        imagen: (p.imagenes && p.imagenes[0]) || '/imagenes/no-image.png',
-        categoria: p.categoria || '',
-        marca: p.marca || '',
-        en_oferta: p.en_oferta || false,
-        precio_original: p.precio_original,
-        badges: p.badges || [],
-        caracteristicas_visuales: p.caracteristicas_visuales || [],
-        caracteristicas: Array.isArray(p.caracteristicas) ? p.caracteristicas : []
-      } as CercoPerimetral));
+      // Transformar productos - SOLO MOSTRAR PRODUCTOS ACTIVOS en la página pública
+      this.articulos = productos
+        .filter(p => p.activo === true) // Filtrar solo productos activos
+        .map(p => ({
+          ...p,
+          imagen: (p.imagenes && p.imagenes[0]) || '/imagenes/no-image.png',
+          categoria: p.categoria || '',
+          marca: p.marca || '',
+          en_oferta: p.en_oferta || false,
+          precio_original: p.precio_original,
+          badges: p.badges || [],
+          caracteristicas_visuales: p.caracteristicas_visuales || [],
+          caracteristicas: Array.isArray(p.caracteristicas) ? p.caracteristicas : []
+        } as CercoPerimetral));
 
       console.log('✅ Artículos cercos procesados:', this.articulos.length);
 

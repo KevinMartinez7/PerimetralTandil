@@ -55,7 +55,11 @@
     </div>
 
     <div class="productos-grid" *ngIf="!loading">
-      <div class="producto-card" *ngFor="let producto of filteredProductos">
+      <div class="producto-card" 
+           *ngFor="let producto of filteredProductos"
+           [class.inactive]="!producto.activo"
+           [title]="!producto.activo ? 'Click para activar este producto' : ''"
+           (click)="!producto.activo && toggleActivo(producto)">
         <div class="producto-image">
           <img [src]="(producto.imagenes && producto.imagenes[0]) || 'assets/no-image.png'" [alt]="producto.nombre">
           <div class="producto-status" [class.activo]="producto.activo" [class.inactivo]="!producto.activo">
@@ -83,13 +87,13 @@
         </div>
 
         <div class="producto-actions">
-          <button class="btn-edit" (click)="openEditModal(producto)">
+          <button class="btn-edit" (click)="openEditModal(producto); $event.stopPropagation()">
             ✏️ Editar
           </button>
-          <button class="btn-toggle" (click)="toggleActivo(producto)">
+          <button class="btn-toggle" (click)="toggleActivo(producto); $event.stopPropagation()">
             {{ producto.activo ? '🔒 Desactivar' : '✓ Activar' }}
           </button>
-          <button class="btn-delete" (click)="deleteProducto(producto.id)">
+          <button class="btn-delete" (click)="deleteProducto(producto.id); $event.stopPropagation()">
             🗑️ Eliminar
           </button>
         </div>
