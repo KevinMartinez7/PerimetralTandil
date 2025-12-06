@@ -62,9 +62,22 @@ export class ProductosComponent implements OnInit {
     private supabaseService: SupabaseService,
     private router: Router,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) {
+    // Verificar autenticación en el constructor (protección adicional)
+    if (!this.supabaseService.isAuthenticated()) {
+      console.log('⚠️ ProductosComponent: Usuario no autenticado, redirigiendo a login');
+      this.router.navigate(['/admin/login']);
+    }
+  }
 
   async ngOnInit() {
+    // Verificar autenticación nuevamente al inicializar
+    if (!this.supabaseService.isAuthenticated()) {
+      console.log('⚠️ ProductosComponent.ngOnInit: Usuario no autenticado, redirigiendo a login');
+      this.router.navigate(['/admin/login']);
+      return;
+    }
+    
     await this.loadData();
   }
 
@@ -228,8 +241,17 @@ export class ProductosComponent implements OnInit {
 
       if (this.editMode && this.currentProducto.id) {
         await this.productosService.updateProducto(this.currentProducto.id, this.currentProducto);
+        
+        // Actualizar el producto en el array local
+        const index = this.productos.findIndex(p => p.id === this.currentProducto.id);
+        if (index !== -1) {
+          this.productos[index] = { ...this.currentProducto };
+        }
       } else {
-        await this.productosService.createProducto(this.currentProducto);
+        const nuevoProducto = await this.productosService.createProducto(this.currentProducto);
+        
+        // Agregar el nuevo producto al array local
+        this.productos.push(nuevoProducto);
       }
       
       this.closeModal();
@@ -238,7 +260,6 @@ export class ProductosComponent implements OnInit {
       this.selectedFile = null;
       this.imagePreview = null;
       
-      await this.loadData();
       this.cdr.detectChanges();
     } catch (error: any) {
       console.error('❌ Error al guardar producto:', error);
@@ -264,9 +285,14 @@ export class ProductosComponent implements OnInit {
     if (!this.productoToDelete) return;
 
     try {
-      await this.productosService.deleteProducto(this.productoToDelete.id);
+      const productoId = this.productoToDelete.id;
+      
+      await this.productosService.deleteProducto(productoId);
+      
+      // Eliminar del array local
+      this.productos = this.productos.filter(p => p.id !== productoId);
+      
       this.closeDeleteModal();
-      await this.loadData();
       this.cdr.detectChanges();
     } catch (error) {
       console.error('Error al eliminar producto:', error);
@@ -277,22 +303,23 @@ export class ProductosComponent implements OnInit {
 
   async toggleActivo(producto: any) {
     try {
-      // Actualizar el estado localmente primero para respuesta inmediata
-      producto.activo = !producto.activo;
-      this.cdr.detectChanges();
+      const nuevoEstado = !producto.activo;
       
-      // Luego actualizar en la base de datos
+      // Actualizar en la base de datos primero
       await this.productosService.updateProducto(producto.id, {
-        activo: producto.activo
+        activo: nuevoEstado
       });
       
-      // Recargar datos para asegurar consistencia
-      await this.loadData();
+      // Actualizar localmente después de confirmar el guardado
+      const index = this.productos.findIndex(p => p.id === producto.id);
+      if (index !== -1) {
+        this.productos[index].activo = nuevoEstado;
+      }
+      
+      this.cdr.detectChanges();
     } catch (error) {
       console.error('Error al actualizar estado:', error);
-      // Revertir el cambio local si falla
-      producto.activo = !producto.activo;
-      this.cdr.detectChanges();
+      alert('Error al actualizar el estado del producto');
     }
   }
 

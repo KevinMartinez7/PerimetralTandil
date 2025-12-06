@@ -30,14 +30,19 @@ export class SupabaseService {
 
     // Cargar usuario desde localStorage solo si estamos en el navegador
     if (this.isBrowser) {
+      console.log('🔍 Verificando usuario en localStorage...');
       const savedUser = localStorage.getItem('admin_user');
       if (savedUser) {
         try {
-          this.currentUser.next(JSON.parse(savedUser));
+          const user = JSON.parse(savedUser);
+          console.log('✅ Usuario recuperado de localStorage:', user);
+          this.currentUser.next(user);
         } catch (error) {
-          console.error('Error al parsear usuario guardado:', error);
+          console.error('❌ Error al parsear usuario guardado:', error);
           localStorage.removeItem('admin_user');
         }
+      } else {
+        console.log('⚠️ No hay usuario guardado en localStorage');
       }
     }
   }
