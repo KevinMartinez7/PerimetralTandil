@@ -58,8 +58,15 @@
       <div class="producto-card" 
            *ngFor="let producto of filteredProductos"
            [class.inactive]="!producto.activo"
-           [title]="!producto.activo ? 'Click para activar este producto' : ''"
-           (click)="!producto.activo && toggleActivo(producto)">
+           [title]="!producto.activo ? 'Click para activar este producto' : ''">
+        
+        <!-- Overlay de activación para productos inactivos -->
+        <div class="activation-overlay" *ngIf="!producto.activo">
+          <button class="btn-activate" (click)="toggleActivo(producto)">
+            ✓ HABILITAR
+          </button>
+        </div>
+        
         <div class="producto-image">
           <img [src]="(producto.imagenes && producto.imagenes[0]) || 'assets/no-image.png'" [alt]="producto.nombre">
           <div class="producto-status" [class.activo]="producto.activo" [class.inactivo]="!producto.activo">
@@ -90,7 +97,7 @@
           <button class="btn-edit" (click)="openEditModal(producto); $event.stopPropagation()">
             ✏️ Editar
           </button>
-          <button class="btn-toggle" (click)="toggleActivo(producto); $event.stopPropagation()">
+          <button class="btn-toggle" (click)="toggleActivo(producto)">
             {{ producto.activo ? '🔒 Desactivar' : '✓ Activar' }}
           </button>
           <button class="btn-delete" (click)="deleteProducto(producto.id); $event.stopPropagation()">
