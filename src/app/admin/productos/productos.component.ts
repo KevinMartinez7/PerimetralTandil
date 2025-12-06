@@ -19,6 +19,8 @@ export class ProductosComponent implements OnInit {
   loading = true;
   showModal = false;
   editMode = false;
+  showDeleteModal = false;
+  productoToDelete: any = null;
   
   // Filtros
   searchTerm = '';
@@ -230,12 +232,14 @@ export class ProductosComponent implements OnInit {
         await this.productosService.createProducto(this.currentProducto);
       }
       
-      await this.loadData();
       this.closeModal();
       
       // Limpiar preview
       this.selectedFile = null;
       this.imagePreview = null;
+      
+      await this.loadData();
+      this.cdr.detectChanges();
     } catch (error: any) {
       console.error('❌ Error al guardar producto:', error);
       console.error('  → message:', error.message);
@@ -246,28 +250,49 @@ export class ProductosComponent implements OnInit {
     }
   }
 
-  async deleteProducto(id: string) {
-    if (!confirm('¿Estás seguro de que deseas eliminar este producto?')) {
-      return;
-    }
+  openDeleteModal(producto: any) {
+    this.productoToDelete = producto;
+    this.showDeleteModal = true;
+  }
+
+  closeDeleteModal() {
+    this.showDeleteModal = false;
+    this.productoToDelete = null;
+  }
+
+  async confirmDelete() {
+    if (!this.productoToDelete) return;
 
     try {
-      await this.productosService.deleteProducto(id);
+      await this.productosService.deleteProducto(this.productoToDelete.id);
+      this.closeDeleteModal();
       await this.loadData();
+      this.cdr.detectChanges();
     } catch (error) {
       console.error('Error al eliminar producto:', error);
       alert('Error al eliminar el producto');
+      this.closeDeleteModal();
     }
   }
 
   async toggleActivo(producto: any) {
     try {
+      // Actualizar el estado localmente primero para respuesta inmediata
+      producto.activo = !producto.activo;
+      this.cdr.detectChanges();
+      
+      // Luego actualizar en la base de datos
       await this.productosService.updateProducto(producto.id, {
-        activo: !producto.activo
+        activo: producto.activo
       });
+      
+      // Recargar datos para asegurar consistencia
       await this.loadData();
     } catch (error) {
       console.error('Error al actualizar estado:', error);
+      // Revertir el cambio local si falla
+      producto.activo = !producto.activo;
+      this.cdr.detectChanges();
     }
   }
 

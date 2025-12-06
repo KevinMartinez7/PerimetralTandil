@@ -100,7 +100,7 @@
           <button class="btn-toggle" (click)="toggleActivo(producto)">
             {{ producto.activo ? '🔒 Desactivar' : '✓ Activar' }}
           </button>
-          <button class="btn-delete" (click)="deleteProducto(producto.id); $event.stopPropagation()">
+          <button class="btn-delete" (click)="openDeleteModal(producto); $event.stopPropagation()">
             🗑️ Eliminar
           </button>
         </div>
@@ -374,6 +374,28 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Modal de Confirmación de Eliminación -->
+  <div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
+    <div class="modal-delete" (click)="$event.stopPropagation()">
+      <div class="modal-delete-icon">
+        <span>⚠️</span>
+      </div>
+      <h2 class="modal-delete-title">¿Estás seguro de que deseas eliminar este producto?</h2>
+      <p class="modal-delete-text" *ngIf="productoToDelete">
+        Se eliminará permanentemente el producto <strong>"{{ productoToDelete.nombre }}"</strong>.
+        Esta acción no se puede deshacer.
+      </p>
+      <div class="modal-delete-actions">
+        <button type="button" class="btn-delete-cancel" (click)="closeDeleteModal()">
+          Cancelar
+        </button>
+        <button type="button" class="btn-delete-confirm" (click)="confirmDelete()">
+          Sí, eliminar
+        </button>
+      </div>
     </div>
   </div>
 </div>
