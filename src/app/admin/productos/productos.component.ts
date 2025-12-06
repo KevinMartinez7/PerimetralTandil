@@ -189,7 +189,20 @@ export class ProductosComponent implements OnInit {
   openEditModal(producto: any) {
     this.editMode = true;
     this.currentProducto = { ...producto };
-    this.imagePreview = (producto.imagenes && producto.imagenes[0]) || null;
+    
+    // Si el producto tiene imágenes
+    if (producto.imagenes && Array.isArray(producto.imagenes) && producto.imagenes.length > 0) {
+      // Primera imagen es la principal
+      this.imagePreview = producto.imagenes[0];
+      // Resto son del carrusel
+      this.imagenesCarrusel = producto.imagenes.length > 1 
+        ? [...producto.imagenes.slice(1)] 
+        : [];
+    } else {
+      this.imagePreview = null;
+      this.imagenesCarrusel = [];
+    }
+    
     this.selectedFile = null;
     
     // Obtener el tipo de producto
@@ -199,13 +212,12 @@ export class ProductosComponent implements OnInit {
     this.badges = producto.badges ? [...producto.badges] : [];
     this.caracteristicasVisuales = producto.caracteristicas_visuales ? [...producto.caracteristicas_visuales] : [];
     
-    // Cargar imágenes del carrusel (todas excepto la primera que es la principal)
-    this.imagenesCarrusel = producto.imagenes && producto.imagenes.length > 1 
-      ? [...producto.imagenes.slice(1)] 
-      : [];
-    
     this.newBadge = '';
     this.newCaracteristica = '';
+    
+    console.log('📝 Editando producto:');
+    console.log('  - Imagen principal:', this.imagePreview);
+    console.log('  - Imágenes carrusel:', this.imagenesCarrusel);
     
     this.showModal = true;
   }
@@ -236,17 +248,28 @@ export class ProductosComponent implements OnInit {
       
       // 1. Imagen principal (obligatoria)
       if (this.selectedFile) {
+        // Se seleccionó una nueva imagen principal
+        console.log('📤 Subiendo nueva imagen principal...');
         const imageUrl = await this.uploadImage();
         if (imageUrl) {
           todasLasImagenes.push(imageUrl);
+          console.log('✅ Imagen principal subida:', imageUrl);
         }
       } else if (this.imagePreview) {
-        // Si estamos editando y no se cambió la imagen principal, mantener la existente
+        // Mantener la imagen principal existente
+        console.log('✅ Manteniendo imagen principal existente:', this.imagePreview);
         todasLasImagenes.push(this.imagePreview);
       }
       
-      // 2. Agregar imágenes del carrusel
-      todasLasImagenes.push(...this.imagenesCarrusel);
+      // 2. Agregar imágenes del carrusel (validar que sean strings válidos)
+      const imagenesCarruselValidas = this.imagenesCarrusel.filter(img => 
+        img && typeof img === 'string' && img.trim().length > 0
+      );
+      todasLasImagenes.push(...imagenesCarruselValidas);
+      
+      console.log('🖼️ Total de imágenes a guardar:', todasLasImagenes.length);
+      console.log('  - Imagen principal:', todasLasImagenes[0]);
+      console.log('  - Imágenes carrusel:', todasLasImagenes.slice(1));
       
       // Asignar todas las imágenes al producto
       this.currentProducto.imagenes = todasLasImagenes;
@@ -422,10 +445,7 @@ export class ProductosComponent implements OnInit {
     event.stopPropagation();
     this.selectedFile = null;
     this.imagePreview = null;
-    // Limpiar el array de imágenes si existe
-    if (this.currentProducto.imagenes && this.currentProducto.imagenes.length > 0) {
-      this.currentProducto.imagenes = [];
-    }
+    console.log('🗑️ Imagen principal eliminada');
     // Forzar detección de cambios para ocultar la imagen inmediatamente
     this.cdr.detectChanges();
   }
@@ -561,7 +581,10 @@ export class ProductosComponent implements OnInit {
     if (event) {
       event.stopPropagation();
     }
+    console.log('🗑️ Eliminando imagen del carrusel en índice:', index);
+    console.log('   Antes:', this.imagenesCarrusel.length, 'imágenes');
     this.imagenesCarrusel.splice(index, 1);
+    console.log('   Después:', this.imagenesCarrusel.length, 'imágenes');
     this.cdr.detectChanges();
   }
 
