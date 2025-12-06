@@ -13,7 +13,12 @@ export interface Producto {
   tipo: 'cerco' | 'rural';  // Tipo de producto
   marca?: string;  // Nombre de la marca directamente
   imagenes?: string[];  // Array de URLs de imágenes
-  caracteristicas?: any;  // JSONB
+  caracteristicas?: any;  // JSONB - características generales
+  
+  // Campos específicos para CERCOS PERIMETRALES
+  badges?: string[];  // Ej: ['URBANO', 'METALPRO']
+  caracteristicas_visuales?: string[];  // Ej: ['Altura 2m', 'Postes galvanizados', 'Malla electrosoldada', 'Garantía 10 años']
+  
   en_oferta?: boolean;
   activo: boolean;
   vistas?: number;
@@ -52,7 +57,8 @@ export class ProductosService {
       .eq('activo', true);
 
     if (tipo) {
-      // Cargar productos con filtro de tipo después
+      query = query.eq('tipo', tipo);
+      console.log('🔍 Filtro aplicado: tipo =', tipo);
     }
 
     const { data, error } = await query.order('nombre');
@@ -103,6 +109,8 @@ export class ProductosService {
       marca: producto.marca || null,
       imagenes: producto.imagenes || [],
       caracteristicas: producto.caracteristicas || {},
+      badges: producto.badges || [],
+      caracteristicas_visuales: producto.caracteristicas_visuales || [],
       en_oferta: producto.en_oferta || false,
       activo: producto.activo
     };

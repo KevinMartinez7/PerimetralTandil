@@ -34,6 +34,12 @@ export class ProductosComponent implements OnInit {
   // Tipo de producto seleccionado en el formulario
   selectedTipoProducto: 'cerco' | 'rural' | '' = '';
 
+  // Campos para cercos perimetrales
+  badges: string[] = [];
+  newBadge: string = '';
+  caracteristicasVisuales: string[] = [];
+  newCaracteristica: string = '';
+
   // Producto actual para editar/crear
   currentProducto: Producto = {
     nombre: '',
@@ -44,6 +50,8 @@ export class ProductosComponent implements OnInit {
     tipo: 'cerco',
     marca: '',
     imagenes: [],
+    badges: [],
+    caracteristicas_visuales: [],
     activo: true
   };
 
@@ -124,11 +132,17 @@ export class ProductosComponent implements OnInit {
       tipo: 'cerco',
       marca: '',
       imagenes: [],
+      badges: [],
+      caracteristicas_visuales: [],
       activo: true
     };
     this.selectedFile = null;
     this.imagePreview = null;
     this.selectedTipoProducto = '';
+    this.badges = [];
+    this.caracteristicasVisuales = [];
+    this.newBadge = '';
+    this.newCaracteristica = '';
     this.showModal = true;
   }
 
@@ -141,6 +155,12 @@ export class ProductosComponent implements OnInit {
     // Obtener el tipo de producto
     this.selectedTipoProducto = producto.tipo || '';
     
+    // Cargar badges y características visuales si existen
+    this.badges = producto.badges ? [...producto.badges] : [];
+    this.caracteristicasVisuales = producto.caracteristicas_visuales ? [...producto.caracteristicas_visuales] : [];
+    this.newBadge = '';
+    this.newCaracteristica = '';
+    
     this.showModal = true;
   }
 
@@ -149,6 +169,10 @@ export class ProductosComponent implements OnInit {
     this.selectedFile = null;
     this.imagePreview = null;
     this.selectedTipoProducto = '';
+    this.badges = [];
+    this.caracteristicasVisuales = [];
+    this.newBadge = '';
+    this.newCaracteristica = '';
   }
 
   onTipoProductoChange() {
@@ -177,6 +201,10 @@ export class ProductosComponent implements OnInit {
       if (!this.currentProducto.tipo) {
         this.currentProducto.tipo = this.selectedTipoProducto as 'cerco' | 'rural';
       }
+
+      // Asignar badges y características visuales desde los arrays temporales
+      this.currentProducto.badges = [...this.badges];
+      this.currentProducto.caracteristicas_visuales = [...this.caracteristicasVisuales];
 
       // 🔍 DEBUG: Ver exactamente qué estamos enviando
       console.log('💾 Intentando guardar producto...');
@@ -330,6 +358,30 @@ export class ProductosComponent implements OnInit {
         this.uploadProgress = 0;
       }, 1000);
     }
+  }
+
+  // Métodos para gestionar badges
+  addBadge() {
+    if (this.newBadge.trim() && !this.badges.includes(this.newBadge.trim().toUpperCase())) {
+      this.badges.push(this.newBadge.trim().toUpperCase());
+      this.newBadge = '';
+    }
+  }
+
+  removeBadge(badge: string) {
+    this.badges = this.badges.filter(b => b !== badge);
+  }
+
+  // Métodos para gestionar características visuales
+  addCaracteristica() {
+    if (this.newCaracteristica.trim() && !this.caracteristicasVisuales.includes(this.newCaracteristica.trim())) {
+      this.caracteristicasVisuales.push(this.newCaracteristica.trim());
+      this.newCaracteristica = '';
+    }
+  }
+
+  removeCaracteristica(caracteristica: string) {
+    this.caracteristicasVisuales = this.caracteristicasVisuales.filter(c => c !== caracteristica);
   }
 
   logout() {

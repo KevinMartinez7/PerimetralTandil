@@ -1,8 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { CercosPerimetralesService, CercoPerimetral } from '../services/cercos-perimetrales.service';
+import { ProductosService, Producto } from '../../../core/services/productos.service';
+
+// Interface local para compatibilidad con el template
+interface CercoPerimetral extends Producto {
+  imagen: string;
+  en_oferta?: boolean;
+  precio_original?: number;
+}
 
 @Component({
   selector: 'app-cerco-detalle',
@@ -11,10 +18,18 @@ import { CercosPerimetralesService, CercoPerimetral } from '../services/cercos-p
   templateUrl: './cerco-detalle.component.html',
   styleUrl: './cerco-detalle.component.scss'
 })
-export class CercoDetalleComponent implements OnInit {
+export class CercoDetalleComponent implements OnInit, OnDestroy {
   cerco: CercoPerimetral | null = null;
   imagenesCarrusel: string[] = [];
   imagenActualIndex: number = 0;
+  loading: boolean = true;
+
+  // Auto-recuperación
+  private intentosRecuperacion = 0;
+  private maxIntentosRecuperacion = 3;
+  private timerRecuperacion: any = null;
+  private timerTimeoutSeguridad: any = null;
+  private timerBackupRecuperacion: any = null;
 
   // Control del modal del formulario
   mostrarFormularioWhatsApp: boolean = false;
@@ -42,48 +57,228 @@ export class CercoDetalleComponent implements OnInit {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private cercosService: CercosPerimetralesService
+    private productosService: ProductosService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
+    console.log('🚀 CercoDetalleComponent inicializado');
     const cercoId = this.route.snapshot.paramMap.get('id');
+    console.log('🆔 ID del cerco desde la ruta:', cercoId);
     if (cercoId) {
+      // Inicializar mecanismo de auto-recuperación
+      this.iniciarRecuperacionAutomatica();
       this.cargarCerco(cercoId);
+    } else {
+      console.error('❌ No se proporcionó ID del cerco');
+      this.loading = false;
+      this.cdr.detectChanges();
     }
   }
 
-  cargarCerco(id: string) {
-    this.cercosService.getCercos().subscribe(cercos => {
-      this.cerco = cercos.find(c => c.id.toString() === id) || null;
-      if (this.cerco) {
-        // Configurar imágenes específicas para cada producto
-        if (this.cerco.id === 1 && this.cerco.nombre === 'Cerco Metálico Residencial Premium') {
-          // Imágenes específicas para el Cerco Metálico Premium
-          this.imagenesCarrusel = [
-            this.cerco.imagen, // Primera imagen (la principal)
-            '/imagenes/cerco-metalico-premium-2.jpg', // Segunda imagen
-            '/imagenes/cerco-metalico-premium-3.jpg', // Tercera imagen
-            this.cerco.imagen  // Cuarta imagen (repetir la principal)
-          ];
-        } else if (this.cerco.id === 2 && this.cerco.nombre === 'Cerco de Malla Ciclónica Urbana') {
-          // Imágenes específicas para Malla Ciclónica
-          this.imagenesCarrusel = [
-            this.cerco.imagen, // Primera imagen (la principal)
-            '/imagenes/malla-ciclonica-instalacion.jpg', // Segunda imagen
-            this.cerco.imagen,  // Tercera imagen (repetir la principal)
-            this.cerco.imagen  // Cuarta imagen (repetir la principal)
-          ];
+  ngOnDestroy() {
+    console.log('🧹 CercoDetalleComponent destruyéndose - limpiando todos los timers');
+    this.detenerRecuperacionAutomatica();
+    
+    // Limpieza adicional por si acaso
+    if (this.timerRecuperacion) {
+      clearInterval(this.timerRecuperacion);
+      this.timerRecuperacion = null;
+    }
+    if (this.timerTimeoutSeguridad) {
+      clearTimeout(this.timerTimeoutSeguridad);
+      this.timerTimeoutSeguridad = null;
+    }
+    if (this.timerBackupRecuperacion) {
+      clearInterval(this.timerBackupRecuperacion);
+      this.timerBackupRecuperacion = null;
+    }
+  }
+
+  async cargarCerco(id: string) {
+    console.log('🔍 Buscando producto con ID:', id);
+    this.loading = true;
+    this.cdr.markForCheck();
+    this.cdr.detectChanges(); // Forzar actualización del loading
+    
+    try {
+      // Cargar productos cercos desde Supabase
+      console.log('📞 Llamando a ProductosService.getProductos()...');
+      const productos = await this.productosService.getProductos('cerco');
+      console.log('📦 Productos recibidos:', productos);
+      
+      // Buscar el producto por ID
+      const productoEncontrado = productos.find(p => p.id?.toString() === id);
+      console.log('✅ Producto encontrado:', productoEncontrado);
+      console.log('🔍 Propiedades del producto encontrado:', Object.keys(productoEncontrado || {}));
+      console.log('📊 Stock crudo del producto:', productoEncontrado?.stock);
+      console.log('📊 Tipo de stock:', typeof productoEncontrado?.stock);
+      
+      if (productoEncontrado) {
+        // Convertir Producto a CercoPerimetral
+        this.cerco = {
+          ...productoEncontrado,
+          imagen: productoEncontrado.imagenes && productoEncontrado.imagenes.length > 0 
+            ? productoEncontrado.imagenes[0] 
+            : '/imagenes/placeholder-cerco.jpg',
+          en_oferta: productoEncontrado.en_oferta,
+          precio_original: productoEncontrado.precio_original
+        };
+        
+        console.log('🎯 Cerco asignado al componente:', this.cerco);
+        console.log('📊 Stock del producto:', this.cerco?.stock, typeof this.cerco?.stock);
+        console.log('🏷️ Características del producto:', this.cerco?.caracteristicas, typeof this.cerco?.caracteristicas);
+        
+        // Configurar carrusel de imágenes
+        if (productoEncontrado.imagenes && productoEncontrado.imagenes.length > 0) {
+          this.imagenesCarrusel = productoEncontrado.imagenes;
         } else {
-          // Para otros productos, usar la imagen principal repetida
+          // Si no hay imágenes, usar placeholder
+          const imagenFallback = this.cerco?.imagen || '/imagenes/placeholder-cerco.jpg';
           this.imagenesCarrusel = [
-            this.cerco.imagen,
-            this.cerco.imagen,
-            this.cerco.imagen,
-            this.cerco.imagen
+            imagenFallback,
+            imagenFallback,
+            imagenFallback,
+            imagenFallback
           ];
         }
+        
+        console.log('🖼️ Imágenes del carrusel:', this.imagenesCarrusel);
+        console.log('🔄 Estado del componente - cerco existe:', !!this.cerco);
+        
+        // Múltiples actualizaciones agresivas para asegurar que se renderice
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
+        setTimeout(() => {
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
+        }, 50);
+        
+      } else {
+        console.error('❌ No se encontró el producto con ID:', id);
+        this.cerco = null;
       }
+    } catch (error) {
+      console.error('❌ Error al cargar producto:', error);
+      this.cerco = null;
+    } finally {
+      this.loading = false;
+      // Usar setTimeout para evitar el error de detección de cambios
+      setTimeout(() => {
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
+      }, 0);
+      console.log('✨ Loading finalizado. Estado:', { loading: this.loading, cerco: !!this.cerco });
+      
+      // Detener auto-recuperación si fue exitoso
+      if (this.cerco) {
+        this.detenerRecuperacionAutomatica();
+      }
+    }
+  }
+
+  // Métodos de auto-recuperación
+  private iniciarRecuperacionAutomatica() {
+    console.log('🔄 Iniciando mecanismo de auto-recuperación AGRESIVO para detalle');
+    
+    // Timer de timeout de seguridad (3 segundos - más agresivo)
+    this.timerTimeoutSeguridad = setTimeout(() => {
+      console.log('⚠️ Timeout de seguridad activado - forzando recuperación inmediata');
+      this.forzarRecuperacion();
+    }, 3000);
+
+    // Timer de verificación cada 1.5 segundos (más frecuente)
+    this.timerRecuperacion = setInterval(() => {
+      this.verificarEstadoYRecuperar();
+    }, 1500);
+
+    // Timer de backup que fuerza recuperación cada 5 segundos sin excepción
+    this.timerBackupRecuperacion = setInterval(() => {
+      console.log('🆘 RECUPERACIÓN DE EMERGENCIA - Forzando recarga');
+      if (!this.cerco && this.loading) {
+        this.forzarRecuperacionCompleta();
+      }
+    }, 5000);
+  }
+
+  private detenerRecuperacionAutomatica() {
+    console.log('✅ Deteniendo auto-recuperación - producto cargado exitosamente');
+    if (this.timerRecuperacion) {
+      clearInterval(this.timerRecuperacion);
+      this.timerRecuperacion = null;
+    }
+    if (this.timerTimeoutSeguridad) {
+      clearTimeout(this.timerTimeoutSeguridad);
+      this.timerTimeoutSeguridad = null;
+    }
+    if (this.timerBackupRecuperacion) {
+      clearInterval(this.timerBackupRecuperacion);
+      this.timerBackupRecuperacion = null;
+    }
+  }
+
+  private verificarEstadoYRecuperar() {
+    console.log('🔍 Verificando estado del componente:', {
+      loading: this.loading,
+      tieneCerco: !!this.cerco,
+      intentos: this.intentosRecuperacion
     });
+
+    // Si está cargando pero no hay cerco después de un tiempo
+    if (this.loading && !this.cerco) {
+      this.forzarRecuperacion();
+    }
+    
+    // Si ya tiene cerco, detener recuperación
+    if (this.cerco) {
+      this.detenerRecuperacionAutomatica();
+    }
+  }
+
+  private forzarRecuperacion() {
+    if (this.intentosRecuperacion >= this.maxIntentosRecuperacion) {
+      console.log('❌ Máximo de intentos de recuperación alcanzado');
+      this.detenerRecuperacionAutomatica();
+      return;
+    }
+
+    this.intentosRecuperacion++;
+    console.log(`🔄 Forzando recuperación - intento ${this.intentosRecuperacion}/${this.maxIntentosRecuperacion}`);
+
+    const cercoId = this.route.snapshot.paramMap.get('id');
+    if (cercoId) {
+      // Resetear estado y recargar
+      this.loading = true;
+      this.cerco = null;
+      this.cdr.markForCheck();
+      this.cdr.detectChanges();
+      
+      // Recargar con delay para evitar problemas
+      setTimeout(() => {
+        this.cargarCerco(cercoId);
+      }, 500);
+    }
+  }
+
+  private forzarRecuperacionCompleta() {
+    console.log('🆘 RECUPERACIÓN COMPLETA DE EMERGENCIA');
+    const cercoId = this.route.snapshot.paramMap.get('id');
+    if (cercoId) {
+      // Resetear completamente el estado
+      this.loading = true;
+      this.cerco = null;
+      this.imagenesCarrusel = [];
+      this.imagenActualIndex = 0;
+      
+      // Forzar múltiples actualizaciones
+      this.cdr.markForCheck();
+      this.cdr.detectChanges();
+      setTimeout(() => this.cdr.detectChanges(), 100);
+      setTimeout(() => this.cdr.detectChanges(), 300);
+      
+      // Recargar inmediatamente
+      this.cargarCerco(cercoId);
+    }
   }
 
   goBack() {
@@ -231,5 +426,51 @@ ${this.formularioContacto.comentario}
       return 'Consultar precio';
     }
     return '$' + precio.toLocaleString();
+  }
+
+  formatearStock(stock: number | undefined | null): string {
+    console.log('🔢 Formateando stock:', stock, typeof stock);
+    
+    if (stock === undefined || stock === null) {
+      return 'Consultar disponibilidad';
+    }
+    
+    if (stock === 0) {
+      return 'Sin stock';
+    }
+    
+    return `${stock} unidades disponibles`;
+  }
+
+  obtenerCaracteristicas(): { clave: string, valor: string }[] {
+    if (!this.cerco?.caracteristicas) {
+      return [];
+    }
+
+    // Si es un array, devolverlo como está
+    if (Array.isArray(this.cerco.caracteristicas)) {
+      return this.cerco.caracteristicas.map((car, index) => ({
+        clave: `Característica ${index + 1}`,
+        valor: car
+      }));
+    }
+
+    // Si es un objeto, convertir a array de pares clave-valor
+    if (typeof this.cerco.caracteristicas === 'object') {
+      return Object.entries(this.cerco.caracteristicas).map(([clave, valor]) => ({
+        clave: clave,
+        valor: String(valor)
+      }));
+    }
+
+    // Si es una string, tratarla como característica única
+    if (typeof this.cerco.caracteristicas === 'string') {
+      return [{
+        clave: 'Característica',
+        valor: this.cerco.caracteristicas
+      }];
+    }
+
+    return [];
   }
 }

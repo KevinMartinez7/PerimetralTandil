@@ -1,270 +1,343 @@
-<!-- Detalle de Cerco Perimetral -->
-<div class="cerco-detalle-container" *ngIf="cerco">
-  <div class="container">
-    
-    <!-- Botón de volver -->
-    <div class="back-button-container">
-      <button (click)="goBack()" class="back-button">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<!-- Detalle del Cerco Perimetral -->
+<div class="articulo-detalle-container" *ngIf="!loading && cerco">
+  
+  <!-- Header con botón volver -->
+  <div class="detalle-header">
+    <div class="container">
+      <button class="back-button" (click)="goBack()" type="button">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         Volver a Cercos Perimetrales
       </button>
     </div>
+  </div>
 
-    <!-- Contenido principal -->
-    <div class="detalle-content">
-      
-      <!-- Sección izquierda - Carrusel de imágenes -->
-      <div class="imagen-section">
+  <!-- Contenido principal -->
+  <div class="detalle-content">
+    <div class="container">
+      <div class="detalle-grid">
+        
+        <!-- Carrusel de imágenes -->
         <div class="carrusel-container">
-          <!-- Imagen principal -->
-          <div class="imagen-principal">
+          <div class="carrusel-principal">
             <img 
               [src]="imagenesCarrusel[imagenActualIndex]" 
               [alt]="cerco.nombre"
+              class="imagen-principal"
               (click)="abrirImagenAmpliada(imagenesCarrusel[imagenActualIndex])"
-              style="cursor: pointer;"
-              onerror="this.src='/imagenes/placeholder-cerco.jpg'"
-            >
+              style="cursor: pointer;">
             
-            <!-- Botones de navegación -->
-            <button class="nav-button prev" (click)="anteriorImagen()" [disabled]="imagenesCarrusel.length <= 1">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Controles del carrusel -->
+            <button class="carrusel-btn carrusel-anterior" (click)="anteriorImagen()">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
               </svg>
             </button>
             
-            <button class="nav-button next" (click)="siguienteImagen()" [disabled]="imagenesCarrusel.length <= 1">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <button class="carrusel-btn carrusel-siguiente" (click)="siguienteImagen()">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
               </svg>
             </button>
-            
-            <!-- Badge de oferta -->
-            <div *ngIf="cerco.enOferta" class="offer-badge">¡OFERTA ESPECIAL!</div>
           </div>
-          
-          <!-- Thumbnails -->
-          <div class="thumbnails" *ngIf="imagenesCarrusel.length > 1">
+
+          <!-- Miniaturas -->
+          <div class="carrusel-miniaturas">
             <button 
               *ngFor="let imagen of imagenesCarrusel; let i = index"
-              (click)="irAImagen(i)"
-              class="thumbnail"
+              class="miniatura-btn"
               [class.active]="i === imagenActualIndex"
-            >
-              <img [src]="imagen" [alt]="'Vista ' + (i + 1)" onerror="this.src='/imagenes/placeholder-cerco.jpg'">
+              (click)="irAImagen(i)">
+              <img [src]="imagen" [alt]="'Imagen ' + (i + 1)">
             </button>
           </div>
+        </div>
+
+        <!-- Información del producto -->
+        <div class="producto-info">
+          
+          <!-- Título y descripción -->
+          <div class="producto-header">
+            <h1 class="producto-titulo">{{cerco.nombre}}</h1>
+            <p class="producto-descripcion">{{cerco.descripcion}}</p>
+          </div>
+
+          <!-- Información del vendedor -->
+          <div class="vendedor-info">
+            <p><strong>Vende:</strong> Perimetral Tandil</p>
+            <p><strong>📍 Ubicación:</strong> Magallanes 1250, Tandil, Buenos Aires</p>
+            <p><strong>📞 Teléfono:</strong> +54 9 2494316864</p>
+            <p><strong>📧 Email:</strong> perimetralalambrados@gmail.com</p>
+          </div>
+
+          <!-- Precio -->
+          <div class="precio-container">
+            <div class="precio-principal">{{formatearPrecio(cerco.precio)}}</div>
+            <div class="precio-beneficios">
+              <div class="beneficio">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                Garantía Perimetral Tandil
+              </div>
+              <div class="beneficio">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/>
+                </svg>
+                Entrega en Tandil y zona
+              </div>
+              <div class="beneficio">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                </svg>
+                Financiación disponible
+              </div>
+            </div>
+          </div>
+
+          <!-- Botones de acción -->
+          <div class="acciones-container">
+            <button class="btn-whatsapp" (click)="contactarPorWhatsApp()">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.89 3.488"/>
+              </svg>
+              WhatsApp
+            </button>
+            <button class="btn-preguntar" (click)="preguntar()">
+              Preguntar
+            </button>
+          </div>
+
         </div>
       </div>
 
-      <!-- Sección derecha - Información del producto -->
-      <div class="info-section">
-        <div class="producto-header">
-          <div class="breadcrumb">
-            <a routerLink="/" class="breadcrumb-link">Inicio</a>
-            <span class="breadcrumb-separator">></span>
-            <a routerLink="/cercos-perimetrales" class="breadcrumb-link">Cercos Perimetrales</a>
-            <span class="breadcrumb-separator">></span>
-            <span class="breadcrumb-current">{{ cerco.nombre }}</span>
-          </div>
-          
-          <h1 class="producto-titulo">{{ cerco.nombre }}</h1>
-          
-          <div class="producto-meta">
-            <span class="categoria-badge">{{ cerco.categoria }}</span>
-            <span class="marca-badge">{{ cerco.marca }}</span>
-            <span class="stock-badge" [class.low-stock]="cerco.stock <= 5">
-              Stock: {{ cerco.stock }} unidades
-            </span>
-          </div>
-        </div>
-
-        <!-- Precio -->
-        <div class="precio-section">
-          <div *ngIf="cerco.enOferta && cerco.precioOriginal" class="precio-oferta">
-            <span class="precio-original">{{ formatearPrecio(cerco.precioOriginal) }}</span>
-            <span class="descuento-badge">
-              {{ ((cerco.precioOriginal - cerco.precio) / cerco.precioOriginal * 100).toFixed(0) }}% OFF
-            </span>
-          </div>
-          <div class="precio-actual" [class.precio-especial]="cerco.enOferta">
-            {{ formatearPrecio(cerco.precio) }}
-          </div>
-          <p class="precio-nota">* Precios sujetos a cambios sin previo aviso</p>
-        </div>
-
-        <!-- Descripción -->
-        <div class="descripcion-section">
-          <h3>Descripción</h3>
-          <p>{{ cerco.descripcion }}</p>
-        </div>
-
+      <!-- Información del producto (parte inferior) -->
+      <div class="producto-detalles">
+        <h2>Información del producto</h2>
+        
         <!-- Características -->
-        <div class="caracteristicas-section">
-          <h3>Características Principales</h3>
-          <ul class="caracteristicas-lista">
-            <li *ngFor="let caracteristica of cerco.caracteristicas">
-              <svg class="check-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              {{ caracteristica }}
-            </li>
-          </ul>
-        </div>
-
-        <!-- Botones de acción -->
-        <div class="acciones-section">
-          <button (click)="contactarPorWhatsApp()" class="btn-principal">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M21 11.5C21.0034 12.8199 20.6951 14.1219 20.1 15.3C19.3944 16.7118 18.3098 17.8992 16.9674 18.7293C15.6251 19.5594 14.0782 19.9994 12.5 20C11.1801 20.0035 9.87812 19.6951 8.7 19.1L3 21L4.9 15.3C4.30493 14.1219 3.99656 12.8199 4 11.5C4.00061 9.92179 4.44061 8.37488 5.27072 7.03258C6.10083 5.69028 7.28825 4.60561 8.7 3.90003C9.87812 3.30496 11.1801 2.99659 12.5 3.00003H13C15.0843 3.11502 17.053 3.99479 18.5291 5.47086C20.0052 6.94693 20.885 8.91568 21 11V11.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Solicitar Cotización
-          </button>
+        <div class="caracteristicas-grid">
+          <div class="caracteristica-item">
+            <strong>Descripción</strong>
+            <p>{{cerco.descripcion}}</p>
+          </div>
           
-          <button (click)="preguntar()" class="btn-secundario">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
-              <path d="M12 1V3M12 21V23M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M1 12H3M21 12H23M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22" stroke="currentColor" stroke-width="2"/>
-            </svg>
-            Hacer Consulta
-          </button>
+          <div class="caracteristica-item" *ngFor="let caracteristica of obtenerCaracteristicas()">
+            <strong>{{caracteristica.clave}}</strong>
+            <p>{{caracteristica.valor}}</p>
+          </div>
+          
+          <div class="caracteristica-item">
+            <strong>Stock disponible</strong>
+            <p>{{formatearStock(cerco.stock)}}</p>
+          </div>
+          
+          <div class="caracteristica-item" *ngIf="cerco.en_oferta">
+            <strong>Oferta especial</strong>
+            <p>Producto en oferta por tiempo limitado</p>
+          </div>
         </div>
 
         <!-- Información adicional -->
         <div class="info-adicional">
-          <div class="info-item">
-            <svg class="info-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M22 16.92V19.92C22.0011 20.1985 21.9441 20.4741 21.8325 20.7293C21.7209 20.9845 21.5573 21.2136 21.3521 21.4019C21.1468 21.5901 20.9046 21.7335 20.6407 21.8227C20.3769 21.9119 20.0974 21.9451 19.82 21.92C16.7428 21.5856 13.787 20.5341 11.19 18.85C8.77382 17.3147 6.72533 15.2662 5.19 12.85C3.49998 10.2412 2.44818 7.27099 2.12 4.17999C2.09501 3.90347 2.12788 3.62476 2.21649 3.36162C2.3051 3.09849 2.44748 2.85669 2.63512 2.65162C2.82276 2.44655 3.05056 2.28271 3.30507 2.17052C3.55958 2.05833 3.83416 2.00026 4.11 1.99999H7.11C7.59531 1.99538 8.06579 2.16708 8.43376 2.48353C8.80173 2.79999 9.04207 3.23945 9.11 3.71999C9.23662 4.68007 9.47144 5.62273 9.81 6.52999C9.94454 6.88792 9.9736 7.27691 9.89384 7.65088C9.81408 8.02485 9.6288 8.36811 9.36 8.63999L8.09 9.90999C9.51355 12.4135 11.5865 14.4864 14.09 15.91L15.36 14.64C15.6319 14.3712 15.9751 14.1859 16.3491 14.1061C16.7231 14.0264 17.1121 14.0555 17.47 14.19C18.3773 14.5286 19.3199 14.7634 20.28 14.89C20.7658 14.9585 21.2094 15.2032 21.5265 15.5775C21.8437 15.9518 22.0122 16.4296 22 16.92Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <div>
-              <strong>Teléfono:</strong>
-              <span>2494316864</span>
+          <div class="contacto-empresa">
+            <h3>Información de Contacto</h3>
+            <div class="contacto-grid">
+              <div class="contacto-item">
+                <strong>📞 Teléfono:</strong>
+                <p>2494316864</p>
+              </div>
+              <div class="contacto-item">
+                <strong>📧 Email:</strong>
+                <p>perimetralalambrados@gmail.com</p>
+              </div>
+              <div class="contacto-item">
+                <strong>📍 Dirección:</strong>
+                <p>Magallanes 1250, Tandil, Buenos Aires</p>
+              </div>
+              <div class="contacto-item">
+                <strong>🌐 Redes Sociales:</strong>
+                <div class="redes-sociales">
+                  <a href="https://www.facebook.com/perimetral.tandil" target="_blank" rel="noopener noreferrer" class="red-social facebook">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                    Facebook
+                  </a>
+                  <a href="https://www.instagram.com/perimetraltandil/" target="_blank" rel="noopener noreferrer" class="red-social instagram">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                    </svg>
+                    Instagram
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
           
-          <div class="info-item">
-            <svg class="info-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M20 10C20 16 12 22 12 22S4 16 4 10C4 7.87827 4.84285 5.84344 6.34315 4.34315C7.84344 2.84285 9.87827 2 12 2C14.1217 2 16.1566 2.84285 17.6569 4.34315C19.1571 5.84344 20 7.87827 20 10Z" stroke="currentColor" stroke-width="2"/>
-              <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
-            </svg>
-            <div>
-              <strong>Ubicación:</strong>
-              <span>Magallanes 1250, Tandil</span>
+          <div class="mapa-ubicacion">
+            <h3>Nuestra Ubicación</h3>
+            <div class="mapa-container">
+              <iframe src="https://www.google.com/maps/embed?pb=!1m23!1m12!1m3!1d101568.49536778702!2d-59.22140292663175!3d-37.294766938501844!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m8!3e6!4m0!4m5!1s0x959121c3b9ffacbb%3A0xcc15f27a0c4c4b91!2sMagallanes%201250%2C%20B7000%20Tandil%2C%20Provincia%20de%20Buenos%20Aires!3m2!1d-37.294823799999996!2d-59.1389655!5e0!3m2!1ses!2sar!4v1761405485994!5m2!1ses!2sar" 
+                width="100%" 
+                height="300" 
+                style="border:0; border-radius: 8px;" 
+                allowfullscreen="" 
+                loading="lazy" 
+                referrerpolicy="no-referrer-when-downgrade">
+              </iframe>
             </div>
           </div>
-          
-          <div class="info-item">
-            <svg class="info-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="2"/>
-              <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="2"/>
-            </svg>
-            <div>
-              <strong>Email:</strong>
-              <span>perimetralalambrados@gmail.com</span>
-            </div>
+
+          <div class="info-publicacion">
+            <p><strong>Última actualización:</strong> 22/10/2025</p>
+            <p><strong>Publicado hace:</strong> 10 días</p>
           </div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Modal de formulario de WhatsApp -->
-  <div *ngIf="mostrarFormularioWhatsApp" class="modal-overlay" (click)="cerrarFormulario()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>Solicitar Información</h3>
-        <button (click)="cerrarFormulario()" class="modal-close">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      </div>
-      
-      <form class="contact-form">
-        <div class="form-group">
-          <label for="nombre">Nombre completo *</label>
-          <input 
-            type="text" 
-            id="nombre"
-            [(ngModel)]="formularioContacto.nombre"
-            name="nombre"
-            [class.error]="erroresValidacion.nombre"
-            placeholder="Tu nombre completo"
-          >
-          <span *ngIf="erroresValidacion.nombre" class="error-message">{{ erroresValidacion.nombre }}</span>
-        </div>
-
-        <div class="form-group">
-          <label for="telefono">Teléfono *</label>
-          <input 
-            type="tel" 
-            id="telefono"
-            [(ngModel)]="formularioContacto.telefono"
-            name="telefono"
-            [class.error]="erroresValidacion.telefono"
-            placeholder="Tu número de teléfono"
-          >
-          <span *ngIf="erroresValidacion.telefono" class="error-message">{{ erroresValidacion.telefono }}</span>
-        </div>
-
-        <div class="form-group">
-          <label for="email">Email *</label>
-          <input 
-            type="email" 
-            id="email"
-            [(ngModel)]="formularioContacto.email"
-            name="email"
-            [class.error]="erroresValidacion.email"
-            placeholder="tu.email@ejemplo.com"
-          >
-          <span *ngIf="erroresValidacion.email" class="error-message">{{ erroresValidacion.email }}</span>
-        </div>
-
-        <div class="form-group">
-          <label for="comentario">Consulta o comentario *</label>
-          <textarea 
-            id="comentario"
-            [(ngModel)]="formularioContacto.comentario"
-            name="comentario"
-            [class.error]="erroresValidacion.comentario"
-            placeholder="Cuéntanos qué necesitas, medidas, características especiales, etc."
-            rows="4"
-          ></textarea>
-          <span *ngIf="erroresValidacion.comentario" class="error-message">{{ erroresValidacion.comentario }}</span>
-        </div>
-
-        <div class="form-actions">
-          <button type="button" (click)="cerrarFormulario()" class="btn-cancelar">Cancelar</button>
-          <button type="button" (click)="enviarConsultaWhatsApp()" class="btn-enviar">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M21 11.5C21.0034 12.8199 20.6951 14.1219 20.1 15.3C19.3944 16.7118 18.3098 17.8992 16.9674 18.7293C15.6251 19.5594 14.0782 19.9994 12.5 20C11.1801 20.0035 9.87812 19.6951 8.7 19.1L3 21L4.9 15.3C4.30493 14.1219 3.99656 12.8199 4 11.5C4.00061 9.92179 4.44061 8.37488 5.27072 7.03258C6.10083 5.69028 7.28825 4.60561 8.7 3.90003C9.87812 3.30496 11.1801 2.99659 12.5 3.00003H13C15.0843 3.11502 17.053 3.99479 18.5291 5.47086C20.0052 6.94693 20.885 8.91568 21 11V11.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Enviar por WhatsApp
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Modal de imagen ampliada -->
-  <div *ngIf="mostrarImagenAmpliada" class="lightbox-overlay" (click)="cerrarImagenAmpliada()">
-    <button class="lightbox-close" (click)="cerrarImagenAmpliada()">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
-    <div class="lightbox-content" (click)="$event.stopPropagation()">
-      <img [src]="imagenAmpliadaUrl" [alt]="cerco.nombre" class="lightbox-imagen">
     </div>
   </div>
 </div>
 
-<!-- Estado de carga -->
-<div *ngIf="!cerco" class="loading-container">
-  <div class="loading-spinner">
+<!-- Modal del Formulario de WhatsApp -->
+<div class="modal-overlay" *ngIf="mostrarFormularioWhatsApp" (click)="cerrarFormulario()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    
+    <!-- Header del modal -->
+    <div class="modal-header">
+      <h3>Contactar por WhatsApp</h3>
+      <button class="modal-close" (click)="cerrarFormulario()" type="button">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Información del producto -->
+    <div class="modal-producto-info" *ngIf="cerco">
+      <div class="producto-mini">
+        <img [src]="cerco.imagen" [alt]="cerco.nombre" class="producto-imagen-mini">
+        <div class="producto-datos-mini">
+          <h4>{{cerco.nombre}}</h4>
+          <p class="precio-mini">{{formatearPrecio(cerco.precio)}}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulario -->
+    <form class="whatsapp-form" (ngSubmit)="enviarConsultaWhatsApp()">
+      
+      <!-- Campo Nombre -->
+      <div class="form-group">
+        <label for="nombre">Nombre completo *</label>
+        <input 
+          type="text" 
+          id="nombre"
+          [(ngModel)]="formularioContacto.nombre"
+          name="nombre"
+          placeholder="Ingrese su nombre completo"
+          [class.error]="erroresValidacion.nombre"
+          class="form-input">
+        <span class="error-message" *ngIf="erroresValidacion.nombre">{{erroresValidacion.nombre}}</span>
+      </div>
+
+      <!-- Campo Teléfono -->
+      <div class="form-group">
+        <label for="telefono">Teléfono *</label>
+        <input 
+          type="tel" 
+          id="telefono"
+          [(ngModel)]="formularioContacto.telefono"
+          name="telefono"
+          placeholder="Ej: 2494123456"
+          [class.error]="erroresValidacion.telefono"
+          class="form-input">
+        <span class="error-message" *ngIf="erroresValidacion.telefono">{{erroresValidacion.telefono}}</span>
+      </div>
+
+      <!-- Campo Email -->
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input 
+          type="email" 
+          id="email"
+          [(ngModel)]="formularioContacto.email"
+          name="email"
+          placeholder="ejemplo@email.com"
+          [class.error]="erroresValidacion.email"
+          class="form-input">
+        <span class="error-message" *ngIf="erroresValidacion.email">{{erroresValidacion.email}}</span>
+      </div>
+
+      <!-- Campo Comentario -->
+      <div class="form-group">
+        <label for="comentario">Su consulta *</label>
+        <textarea 
+          id="comentario"
+          [(ngModel)]="formularioContacto.comentario"
+          name="comentario"
+          placeholder="Describa su consulta sobre el producto..."
+          rows="4"
+          [class.error]="erroresValidacion.comentario"
+          class="form-textarea"></textarea>
+        <span class="error-message" *ngIf="erroresValidacion.comentario">{{erroresValidacion.comentario}}</span>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="modal-actions">
+        <button type="button" class="btn-cancelar" (click)="cerrarFormulario()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn-preguntar-modal">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.89 3.488"/>
+          </svg>
+          Enviar por WhatsApp
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+</div>
+
+<!-- Modal de Imagen Ampliada (Lightbox) -->
+<div class="lightbox-overlay" *ngIf="mostrarImagenAmpliada" (click)="cerrarImagenAmpliada()">
+  <div class="lightbox-container">
+    <!-- Botón cerrar -->
+    <button class="lightbox-close" (click)="cerrarImagenAmpliada()" type="button" title="Cerrar">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+      </svg>
+    </button>
+    
+    <!-- Imagen ampliada -->
+    <div class="lightbox-content" (click)="$event.stopPropagation()">
+      <img [src]="imagenAmpliadaUrl" [alt]="cerco?.nombre" class="lightbox-imagen">
+    </div>
+  </div>
+</div>
+
+<!-- Mensaje de carga -->
+<div class="loading-container" *ngIf="loading">
+  <div class="loading-content">
     <div class="spinner"></div>
-    <p>Cargando información del cerco...</p>
+    <p>Cargando información del producto...</p>
+  </div>
+</div>
+
+<!-- Mensaje de error si no se encuentra el producto -->
+<div class="error-container" *ngIf="!loading && !cerco">
+  <div class="error-content">
+    <h2>Producto no encontrado</h2>
+    <p>Lo sentimos, no pudimos encontrar el producto que buscas.</p>
+    <button class="back-button" (click)="goBack()" type="button">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Volver a Cercos Perimetrales
+    </button>
   </div>
 </div>
