@@ -230,8 +230,13 @@ export class CategoriasComponent implements OnInit {
   }
 
   openDeleteModal(categoria: Categoria) {
-    this.categoriaToDelete = categoria;
+    if (!categoria || !categoria.id) {
+      console.error('❌ Categoría inválida para eliminar:', categoria);
+      return;
+    }
+    this.categoriaToDelete = { ...categoria };
     this.showDeleteModal = true;
+    console.log('🗑️ Modal de eliminación abierto para:', this.categoriaToDelete);
   }
 
   closeDeleteModal() {
@@ -240,10 +245,20 @@ export class CategoriasComponent implements OnInit {
   }
 
   async confirmDelete() {
-    if (!this.categoriaToDelete) return;
+    console.log('🔄 confirmDelete iniciado. categoriaToDelete:', this.categoriaToDelete);
+    
+    if (!this.categoriaToDelete || !this.categoriaToDelete.id) {
+      console.error('❌ No hay categoría seleccionada para eliminar');
+      alert('Error: No se ha seleccionado una categoría válida para eliminar');
+      this.closeDeleteModal();
+      return;
+    }
 
     try {
       const categoriaId = this.categoriaToDelete.id;
+      const categoriaNombre = this.categoriaToDelete.nombre;
+      
+      console.log('🗑️ Eliminando categoría:', categoriaId, categoriaNombre);
       
       await this.productosService.deleteCategoria(categoriaId);
       
@@ -252,7 +267,7 @@ export class CategoriasComponent implements OnInit {
       
       this.closeDeleteModal();
       
-      this.successMessage = `Categoría "${this.categoriaToDelete.nombre}" eliminada exitosamente`;
+      this.successMessage = `Categoría "${categoriaNombre}" eliminada exitosamente`;
       this.showSuccessModal = true;
       
       setTimeout(() => {
@@ -262,7 +277,7 @@ export class CategoriasComponent implements OnInit {
       
       this.cdr.detectChanges();
     } catch (error: any) {
-      console.error('Error al eliminar categoría:', error);
+      console.error('❌ Error al eliminar categoría:', error);
       alert('Error al eliminar la categoría: ' + (error.message || 'Puede que tenga productos asociados'));
       this.closeDeleteModal();
     }
