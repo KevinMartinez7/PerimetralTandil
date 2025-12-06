@@ -142,7 +142,7 @@
         <button class="close-btn" (click)="closeModal()">×</button>
       </div>
 
-      <form (ngSubmit)="saveCategoria()" class="categoria-form">
+      <form class="categoria-form">
         <div class="form-group">
           <label for="nombre">Nombre de la Categoría *</label>
           <input
@@ -151,7 +151,6 @@
             [(ngModel)]="currentCategoria.nombre"
             name="nombre"
             placeholder="Ej: Alambrados, Tranqueras, Portones..."
-            required
           />
         </div>
 
@@ -161,7 +160,6 @@
             id="tipo"
             [(ngModel)]="currentCategoria.tipo"
             name="tipo"
-            required
           >
             <option value="cerco">🏠 Cercos Perimetrales (Urbano/Ciudad)</option>
             <option value="rural">🌾 Artículos Rurales (Campo)</option>
@@ -191,7 +189,7 @@
           <button type="button" class="btn-cancel" (click)="closeModal()">
             Cancelar
           </button>
-          <button type="submit" class="btn-save">
+          <button type="button" class="btn-save" (click)="saveCategoria()">
             {{ editMode ? 'Actualizar' : 'Crear' }} Categoría
           </button>
         </div>
