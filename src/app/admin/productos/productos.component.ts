@@ -319,6 +319,8 @@ export class ProductosComponent implements OnInit {
     const reader = new FileReader();
     reader.onload = (e: any) => {
       this.imagePreview = e.target.result;
+      // Forzar detección de cambios para mostrar la imagen inmediatamente
+      this.cdr.detectChanges();
     };
     reader.readAsDataURL(file);
   }
@@ -331,6 +333,8 @@ export class ProductosComponent implements OnInit {
     if (this.currentProducto.imagenes && this.currentProducto.imagenes.length > 0) {
       this.currentProducto.imagenes = [];
     }
+    // Forzar detección de cambios para ocultar la imagen inmediatamente
+    this.cdr.detectChanges();
   }
 
   async uploadImage(): Promise<string | null> {
