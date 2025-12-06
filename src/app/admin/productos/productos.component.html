@@ -232,7 +232,8 @@
         </div>
 
         <div class="form-group full-width">
-          <label>Imagen del Producto</label>
+          <label>Imagen Principal del Producto *</label>
+          <small class="field-info">Esta será la imagen principal que se muestra en la lista de productos</small>
           
           <!-- Drag & Drop Area -->
           <div 
@@ -271,6 +272,46 @@
               <div class="progress-fill" [style.width.%]="uploadProgress"></div>
             </div>
             <span class="progress-text">Subiendo: {{uploadProgress}}%</span>
+          </div>
+        </div>
+
+        <!-- Galería de Imágenes para el Carrusel -->
+        <div class="form-group full-width">
+          <label>🖼️ Galería de Imágenes (Carrusel de Detalles)</label>
+          <small class="field-info">Agrega más imágenes que se mostrarán en el carrusel cuando el usuario vea los detalles del producto</small>
+          
+          <div class="carrusel-gallery">
+            <!-- Botón para agregar imágenes -->
+            <div class="add-image-card" (click)="carruselInput.click()">
+              <span class="add-icon">+</span>
+              <p>Agregar Imágenes</p>
+              <small>Múltiples archivos permitidos</small>
+            </div>
+
+            <!-- Imágenes existentes -->
+            <div class="gallery-image-card" *ngFor="let imagen of imagenesCarrusel; let i = index">
+              <img [src]="imagen" [alt]="'Imagen ' + (i + 1)">
+              <button type="button" class="btn-remove-gallery-image" (click)="removeCarruselImage(i, $event)">
+                ✕
+              </button>
+              <div class="image-number">{{ i + 1 }}</div>
+            </div>
+          </div>
+
+          <input
+            #carruselInput
+            type="file"
+            accept="image/*"
+            multiple
+            (change)="onCarruselFileSelected($event)"
+            style="display: none"
+          />
+
+          <div class="upload-progress" *ngIf="uploadingCarrusel">
+            <div class="progress-bar">
+              <div class="progress-fill loading-animation"></div>
+            </div>
+            <span class="progress-text">Subiendo imágenes...</span>
           </div>
         </div>
 

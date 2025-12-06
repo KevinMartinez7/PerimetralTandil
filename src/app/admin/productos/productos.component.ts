@@ -34,6 +34,10 @@ export class ProductosComponent implements OnInit {
   imagePreview: string | null = null;
   selectedFile: File | null = null;
   uploadProgress = 0;
+  
+  // Múltiples imágenes para el carrusel
+  imagenesCarrusel: string[] = [];
+  uploadingCarrusel = false;
 
   // Tipo de producto seleccionado en el formulario
   selectedTipoProducto: 'cerco' | 'rural' | '' = '';
@@ -176,6 +180,7 @@ export class ProductosComponent implements OnInit {
     this.selectedTipoProducto = '';
     this.badges = [];
     this.caracteristicasVisuales = [];
+    this.imagenesCarrusel = [];
     this.newBadge = '';
     this.newCaracteristica = '';
     this.showModal = true;
@@ -193,6 +198,12 @@ export class ProductosComponent implements OnInit {
     // Cargar badges y características visuales si existen
     this.badges = producto.badges ? [...producto.badges] : [];
     this.caracteristicasVisuales = producto.caracteristicas_visuales ? [...producto.caracteristicas_visuales] : [];
+    
+    // Cargar imágenes del carrusel (todas excepto la primera que es la principal)
+    this.imagenesCarrusel = producto.imagenes && producto.imagenes.length > 1 
+      ? [...producto.imagenes.slice(1)] 
+      : [];
+    
     this.newBadge = '';
     this.newCaracteristica = '';
     
@@ -206,6 +217,7 @@ export class ProductosComponent implements OnInit {
     this.selectedTipoProducto = '';
     this.badges = [];
     this.caracteristicasVisuales = [];
+    this.imagenesCarrusel = [];
     this.newBadge = '';
     this.newCaracteristica = '';
   }
@@ -219,18 +231,25 @@ export class ProductosComponent implements OnInit {
 
   async saveProducto() {
     try {
-      // Subir imagen si hay una seleccionada
+      // Construir array completo de imágenes
+      const todasLasImagenes: string[] = [];
+      
+      // 1. Imagen principal (obligatoria)
       if (this.selectedFile) {
         const imageUrl = await this.uploadImage();
         if (imageUrl) {
-          // Inicializar array de imágenes si no existe
-          if (!this.currentProducto.imagenes) {
-            this.currentProducto.imagenes = [];
-          }
-          // Agregar la nueva imagen al array
-          this.currentProducto.imagenes.push(imageUrl);
+          todasLasImagenes.push(imageUrl);
         }
+      } else if (this.imagePreview) {
+        // Si estamos editando y no se cambió la imagen principal, mantener la existente
+        todasLasImagenes.push(this.imagePreview);
       }
+      
+      // 2. Agregar imágenes del carrusel
+      todasLasImagenes.push(...this.imagenesCarrusel);
+      
+      // Asignar todas las imágenes al producto
+      this.currentProducto.imagenes = todasLasImagenes;
 
       // Asegurar que el tipo esté establecido
       if (!this.currentProducto.tipo) {
@@ -471,6 +490,79 @@ export class ProductosComponent implements OnInit {
 
   removeCaracteristica(caracteristica: string) {
     this.caracteristicasVisuales = this.caracteristicasVisuales.filter(c => c !== caracteristica);
+  }
+
+  // Métodos para gestionar imágenes del carrusel
+  async onCarruselFileSelected(event: any) {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    this.uploadingCarrusel = true;
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      
+      // Validar tipo de archivo
+      if (!file.type.startsWith('image/')) {
+        alert(`El archivo ${file.name} no es una imagen válida`);
+        continue;
+      }
+
+      // Validar tamaño (máx 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert(`La imagen ${file.name} no debe superar los 5MB`);
+        continue;
+      }
+
+      try {
+        const imageUrl = await this.uploadCarruselImage(file);
+        if (imageUrl) {
+          this.imagenesCarrusel.push(imageUrl);
+          this.cdr.detectChanges();
+        }
+      } catch (error) {
+        console.error(`Error al subir ${file.name}:`, error);
+      }
+    }
+
+    this.uploadingCarrusel = false;
+    this.cdr.detectChanges();
+    
+    // Limpiar el input para permitir seleccionar los mismos archivos nuevamente
+    event.target.value = '';
+  }
+
+  async uploadCarruselImage(file: File): Promise<string | null> {
+    try {
+      const fileName = `${Date.now()}-${file.name}`;
+      const filePath = `productos/${fileName}`;
+
+      const { data, error } = await this.supabaseService.client.storage
+        .from('productos-imagenes')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = this.supabaseService.client.storage
+        .from('productos-imagenes')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Error al subir imagen del carrusel:', error);
+      return null;
+    }
+  }
+
+  removeCarruselImage(index: number, event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.imagenesCarrusel.splice(index, 1);
+    this.cdr.detectChanges();
   }
 
   closeSuccessModal() {
