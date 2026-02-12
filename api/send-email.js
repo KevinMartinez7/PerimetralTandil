@@ -1,19 +1,4 @@
-import { VercelRequest, VercelResponse } from '@vercel/node';
-
-interface EmailData {
-  nombre: string;
-  telefono: string;
-  email: string;
-  comentario: string;
-  producto: {
-    nombre: string;
-    precio: number;
-    imagen?: string;
-  };
-  seccion: 'cerco' | 'rural';
-}
-
-function generarHTMLEmail(data: EmailData): string {
+function generarHTMLEmail(data) {
   const seccionNombre = data.seccion === 'cerco' ? 'Cercos Perimetrales' : 'Artículos Rurales';
   const colorSeccion = data.seccion === 'cerco' ? '#FCD34D' : '#60A5FA';
 
@@ -164,7 +149,7 @@ ${data.comentario}
   `;
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req, res) {
   console.log('🚀 API Handler iniciado - Método:', req.method);
   
   // Habilitar CORS
@@ -207,14 +192,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const htmlContent = generarHTMLEmail({ nombre, telefono, email, comentario, producto, seccion });
     console.log('✅ HTML generado');
 
-    // Obtener API key desde variables de entorno
-    const resendApiKey = process.env.RESEND_API_KEY || 're_9wyxNPLr_MkUGncB18qwELyAJsZhUxZeJ';
-    console.log('🔑 API Key presente:', resendApiKey ? 'Sí' : 'No');
+    // API key de Resend
+    const resendApiKey = 're_9wyxNPLr_MkUGncB18qwELyAJsZhUxZeJ';
+    console.log('🔑 API Key configurada');
     
     // Configurar payload para Resend
     const payload = {
       from: 'Perimetral Tandil <onboarding@resend.dev>',
-      to: ['perimetralalambrados@gmail.com'], // Email de destino
+      to: ['perimetralalambrados@gmail.com'],
       reply_to: email,
       subject: `Nueva consulta: ${producto.nombre}`,
       html: htmlContent
@@ -247,7 +232,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    console.log('✅ Email enviado exitosamente al buzón:', payload.to[0]);
+    console.log('✅ Email enviado exitosamente');
     return res.json({ 
       success: true, 
       data,
@@ -259,7 +244,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({
       success: false,
       error: 'Error interno del servidor',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error.message
     });
   }
 }
