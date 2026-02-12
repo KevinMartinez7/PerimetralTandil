@@ -199,7 +199,7 @@ export default async function handler(req, res) {
     // Configurar payload para Resend
     const payload = {
       from: 'Perimetral Tandil <onboarding@resend.dev>',
-      to: ['kevin.martinez.jq@gmail.com'],
+      to: ['perimetralalambrados@gmail.com'],
       reply_to: email,
       subject: `Nueva consulta: ${producto.nombre}`,
       html: htmlContent
