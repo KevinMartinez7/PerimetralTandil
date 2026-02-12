@@ -37,6 +37,9 @@ export class ArticuloDetalleComponent implements OnInit, OnDestroy {
   enviandoEmail: boolean = false;
   mensajeRespuesta: string = '';
   
+  // Control del popup de éxito
+  mostrarPopupExito: boolean = false;
+  
   // Control del modal de imagen ampliada
   mostrarImagenAmpliada: boolean = false;
   imagenAmpliadaUrl: string = '';
@@ -421,10 +424,14 @@ export class ArticuloDetalleComponent implements OnInit, OnDestroy {
       });
 
       if (resultado.success) {
-        this.mensajeRespuesta = '✅ ¡Consulta enviada exitosamente! Nos pondremos en contacto contigo pronto.';
+        // Cerrar el formulario y mostrar popup de éxito
+        this.cerrarFormulario();
+        this.mostrarPopupExito = true;
+        
+        // Cerrar el popup automáticamente después de 5 segundos
         setTimeout(() => {
-          this.cerrarFormulario();
-        }, 3000);
+          this.cerrarPopupExito();
+        }, 5000);
       } else {
         this.mensajeRespuesta = '❌ Error al enviar la consulta: ' + (resultado.error || 'Error desconocido');
       }
@@ -434,6 +441,10 @@ export class ArticuloDetalleComponent implements OnInit, OnDestroy {
     } finally {
       this.enviandoEmail = false;
     }
+  }
+
+  cerrarPopupExito() {
+    this.mostrarPopupExito = false;
   }
 
   formatearPrecio(precio: number): string {
