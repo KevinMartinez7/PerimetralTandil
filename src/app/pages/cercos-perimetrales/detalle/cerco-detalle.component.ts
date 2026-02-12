@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ProductosService, Producto } from '../../../core/services/productos.service';
+import { EmailService } from '../../../core/services/email.service';
 
 // Interface local para compatibilidad con el template
 interface CercoPerimetral extends Producto {
@@ -32,7 +33,9 @@ export class CercoDetalleComponent implements OnInit, OnDestroy {
   private timerBackupRecuperacion: any = null;
 
   // Control del modal del formulario
-  mostrarFormularioWhatsApp: boolean = false;
+  mostrarFormulario: boolean = false;
+  enviandoEmail: boolean = false;
+  mensajeRespuesta: string = '';
   
   // Control del modal de imagen ampliada
   mostrarImagenAmpliada: boolean = false;
@@ -58,6 +61,7 @@ export class CercoDetalleComponent implements OnInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute,
     private productosService: ProductosService,
+    private emailService: EmailService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -312,14 +316,16 @@ export class CercoDetalleComponent implements OnInit, OnDestroy {
   }
 
   // Métodos para contacto
-  contactarPorWhatsApp() {
+  preguntar() {
     // Abrir el formulario modal
-    this.mostrarFormularioWhatsApp = true;
+    this.mostrarFormulario = true;
     this.limpiarFormulario();
   }
 
   cerrarFormulario() {
-    this.mostrarFormularioWhatsApp = false;
+    this.mostrarFormulario = false;
+    this.enviandoEmail = false;
+    this.mensajeRespuesta = '';
     this.limpiarFormulario();
   }
 
@@ -388,37 +394,46 @@ export class CercoDetalleComponent implements OnInit, OnDestroy {
     return esValido;
   }
 
-  enviarConsultaWhatsApp() {
+  async enviarConsulta() {
     if (!this.validarFormulario()) {
       return;
     }
 
-    if (this.cerco) {
-      const mensaje = `¡Hola Perimetral Tandil!
-
-📋 *CONSULTA SOBRE CERCO PERIMETRAL*
-*Producto:* ${this.cerco.nombre}
-
-👤 *DATOS DEL CLIENTE*
-*Nombre:* ${this.formularioContacto.nombre}
-*Teléfono:* ${this.formularioContacto.telefono}
-*Email:* ${this.formularioContacto.email}
-
-💬 *CONSULTA*
-${this.formularioContacto.comentario}
-
-¡Espero su respuesta! Gracias.`;
-
-      const enlaceWhatsApp = `https://wa.me/2494316864?text=${encodeURIComponent(mensaje)}`;
-      window.open(enlaceWhatsApp, '_blank');
-      this.cerrarFormulario();
+    if (!this.cerco) {
+      return;
     }
-  }
 
-  preguntar() {
-    // También abrir el formulario para consultas generales
-    this.mostrarFormularioWhatsApp = true;
-    this.limpiarFormulario();
+    this.enviandoEmail = true;
+    this.mensajeRespuesta = '';
+
+    try {
+      const resultado = await this.emailService.enviarConsulta({
+        nombre: this.formularioContacto.nombre,
+        telefono: this.formularioContacto.telefono,
+        email: this.formularioContacto.email,
+        comentario: this.formularioContacto.comentario,
+        producto: {
+          nombre: this.cerco.nombre,
+          precio: this.cerco.precio || 0,
+          imagen: this.cerco.imagen
+        },
+        seccion: 'cerco'
+      });
+
+      if (resultado.success) {
+        this.mensajeRespuesta = '✅ ¡Consulta enviada exitosamente! Nos pondremos en contacto contigo pronto.';
+        setTimeout(() => {
+          this.cerrarFormulario();
+        }, 3000);
+      } else {
+        this.mensajeRespuesta = '❌ Error al enviar la consulta: ' + (resultado.error || 'Error desconocido');
+      }
+    } catch (error) {
+      console.error('Error al enviar consulta:', error);
+      this.mensajeRespuesta = '❌ Error al enviar la consulta. Por favor, intente nuevamente.';
+    } finally {
+      this.enviandoEmail = false;
+    }
   }
 
   formatearPrecio(precio: number): string {

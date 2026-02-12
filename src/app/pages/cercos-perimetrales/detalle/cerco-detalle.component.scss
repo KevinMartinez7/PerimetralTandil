@@ -227,7 +227,7 @@
     flex-wrap: wrap;
 
     .btn-preguntar,
-    .btn-whatsapp {
+    .btn-preguntar-solo {
       padding: 1rem 2rem;
       border-radius: 8px;
       font-family: 'Orbitron', sans-serif;
@@ -247,31 +247,26 @@
       }
     }
 
-    .btn-preguntar {
-      background: transparent;
-      border: 2px solid #FCD34D;
-      color: #FCD34D;
+    .btn-preguntar,
+    .btn-preguntar-solo {
+      background: #DC2626;
+      border: 2px solid #DC2626;
+      color: white;
 
       &:hover {
-        background: #FCD34D;
-        color: #0a0a0a;
+        background: #B91C1C;
+        border-color: #B91C1C;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+      }
+
+      &:active {
+        transform: translateY(0);
       }
     }
 
-    .btn-whatsapp {
-      background: #25D366;
-      border: 2px solid #25D366;
-      color: white;
-
-      svg {
-        width: 20px;
-        height: 20px;
-      }
-
-      &:hover {
-        background: #128C7E;
-        border-color: #128C7E;
-      }
+    .btn-preguntar-solo {
+      max-width: 100%;
     }
   }
 }
@@ -745,7 +740,7 @@
   border-top: 1px solid rgba(252, 211, 77, 0.1);
 
   .btn-cancelar,
-  .btn-preguntar-modal {
+  .btn-enviar-modal {
     padding: 0.75rem 1.5rem;
     border-radius: 8px;
     font-family: 'Orbitron', sans-serif;
@@ -757,6 +752,11 @@
     align-items: center;
     gap: 0.5rem;
     border: 2px solid transparent;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
   }
 
   .btn-cancelar {
@@ -764,16 +764,16 @@
     border-color: #6B7280;
     color: #9CA3AF;
 
-    &:hover {
+    &:hover:not(:disabled) {
       border-color: #9CA3AF;
       color: #E5E7EB;
       background: rgba(156, 163, 175, 0.1);
     }
   }
 
-  .btn-preguntar-modal {
-    background: #25D366;
-    border-color: #25D366;
+  .btn-enviar-modal {
+    background: #DC2626;
+    border-color: #DC2626;
     color: white;
     flex: 1;
     justify-content: center;
@@ -784,14 +784,14 @@
       height: 18px;
     }
 
-    &:hover {
-      background: #128C7E;
-      border-color: #128C7E;
+    &:hover:not(:disabled) {
+      background: #B91C1C;
+      border-color: #B91C1C;
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
     }
 
-    &:active {
+    &:active:not(:disabled) {
       transform: translateY(0);
     }
   }
@@ -801,10 +801,44 @@
     flex-direction: column;
 
     .btn-cancelar,
-    .btn-preguntar-modal {
+    .btn-enviar-modal {
       width: 100%;
       justify-content: center;
     }
+  }
+}
+
+/* Mensaje de respuesta en el formulario */
+.mensaje-respuesta {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  text-align: center;
+  animation: slideDown 0.3s ease;
+
+  &.success {
+    background: rgba(34, 197, 94, 0.1);
+    border: 2px solid #22C55E;
+    color: #22C55E;
+  }
+
+  &.error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 2px solid #EF4444;
+    color: #EF4444;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
