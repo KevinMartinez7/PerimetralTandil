@@ -165,6 +165,8 @@ ${data.comentario}
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  console.log('🚀 API Handler iniciado - Método:', req.method);
+  
   // Habilitar CORS
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -176,61 +178,81 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // Manejar preflight
   if (req.method === 'OPTIONS') {
+    console.log('✅ Preflight request OK');
     return res.status(200).end();
   }
 
   if (req.method !== 'POST') {
+    console.log('❌ Método no permitido:', req.method);
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    console.log('📧 Recibiendo petición de email:', req.body);
+    console.log('📧 Recibiendo petición de email:', JSON.stringify(req.body, null, 2));
 
     const { nombre, telefono, email, comentario, producto, seccion } = req.body;
 
     // Validar datos
     if (!nombre || !telefono || !email || !comentario || !producto) {
+      console.log('❌ Faltan datos requeridos:', { nombre: !!nombre, telefono: !!telefono, email: !!email, comentario: !!comentario, producto: !!producto });
       return res.status(400).json({
         success: false,
         error: 'Faltan datos requeridos'
       });
     }
 
+    console.log('✅ Datos validados correctamente');
+
     // Generar HTML del email
     const htmlContent = generarHTMLEmail({ nombre, telefono, email, comentario, producto, seccion });
+    console.log('✅ HTML generado');
 
+    // Obtener API key desde variables de entorno
+    const resendApiKey = process.env.RESEND_API_KEY || 're_V5sC4o8g_JLDGrCGaHvVYaY3SAqCFh6Kz';
+    console.log('🔑 API Key presente:', resendApiKey ? 'Sí' : 'No');
+    
     // Configurar payload para Resend
     const payload = {
       from: 'Perimetral Tandil <onboarding@resend.dev>',
-      to: ['kevin.martinez.jq@gmail.com'], // Email de testing
+      to: ['perimetralalambrados@gmail.com'], // Email de destino
       reply_to: email,
       subject: `Nueva consulta: ${producto.nombre}`,
       html: htmlContent
     };
+
+    console.log('📤 Enviando email a:', payload.to[0]);
 
     // Enviar email via Resend API
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer re_V5sC4o8g_JLDGrCGaHvVYaY3SAqCFh6Kz'
+        'Authorization': `Bearer ${resendApiKey}`
       },
       body: JSON.stringify(payload)
     });
 
+    console.log('📨 Respuesta de Resend - Status:', response.status);
+
     const data = await response.json();
+    console.log('📨 Respuesta de Resend - Data:', JSON.stringify(data, null, 2));
 
     if (!response.ok) {
-      console.error('❌ Error de Resend:', data);
+      console.error('❌ Error de Resend:', JSON.stringify(data, null, 2));
       return res.status(500).json({
         success: false,
         error: 'Error al enviar email',
-        details: data
+        details: data,
+        status: response.status
       });
     }
 
-    console.log('✅ Email enviado exitosamente:', data);
-    return res.json({ success: true, data });
+    console.log('✅ Email enviado exitosamente al buzón:', payload.to[0]);
+    return res.json({ 
+      success: true, 
+      data,
+      message: 'Email enviado correctamente'
+    });
 
   } catch (error) {
     console.error('❌ Error en API de email:', error);
