@@ -47,7 +47,7 @@ function generarHTMLEmail(data) {
                       ${data.producto.nombre}
                     </p>
                     <p style="margin: 10px 0 0 0; font-size: 24px; font-weight: 700; color: #000000;">
-                      $${data.producto.precio.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      ${data.producto.precio === 0 || !data.producto.precio ? 'Consultar precio' : '$' + data.producto.precio.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
                   </td>
                 </tr>
