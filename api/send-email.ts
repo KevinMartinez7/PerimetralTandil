@@ -208,7 +208,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log('✅ HTML generado');
 
     // Obtener API key desde variables de entorno
-    const resendApiKey = process.env.RESEND_API_KEY || 're_V5sC4o8g_JLDGrCGaHvVYaY3SAqCFh6Kz';
+    const resendApiKey = process.env.RESEND_API_KEY || 're_9wyxNPLr_MkUGncB18qwELyAJsZhUxZeJ';
     console.log('🔑 API Key presente:', resendApiKey ? 'Sí' : 'No');
     
     // Configurar payload para Resend
