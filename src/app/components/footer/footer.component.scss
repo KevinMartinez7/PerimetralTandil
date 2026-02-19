@@ -267,9 +267,17 @@
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(252, 211, 77, 0.1);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   font-family: 'Rajdhani', sans-serif;
   letter-spacing: 0.3px;
+}
+
+.contact-item span {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  flex: 1;
+  min-width: 0;
 }
 
 .contact-item::before {
