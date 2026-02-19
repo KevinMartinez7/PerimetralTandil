@@ -7,7 +7,10 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:perimetral-tandil-app": "node dist/perimetral-tandil-app/server/server.mjs"
+    "serve:ssr:perimetral-tandil-app": "node dist/perimetral-tandil-app/server/server.mjs",
+    "api": "node server-local.js",
+    "dev:all": "powershell -ExecutionPolicy Bypass -File ./start-dev.ps1",
+    "test:email": "node test-email.js"
   },
   "prettier": {
     "printWidth": 100,
@@ -33,6 +36,8 @@
     "@angular/ssr": "^20.3.4",
     "@supabase/supabase-js": "^2.78.0",
     "@vercel/node": "^5.6.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^5.1.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"

@@ -1,6 +1,7 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist/perimetral-tandil-app/browser",
+  "framework": "angular",
   "functions": {
     "api/**/*.js": {
       "memory": 1024,

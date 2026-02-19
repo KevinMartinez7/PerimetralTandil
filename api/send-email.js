@@ -149,7 +149,7 @@ ${data.comentario}
   `;
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   console.log('🚀 API Handler iniciado - Método:', req.method);
   
   // Habilitar CORS
@@ -192,14 +192,26 @@ export default async function handler(req, res) {
     const htmlContent = generarHTMLEmail({ nombre, telefono, email, comentario, producto, seccion });
     console.log('✅ HTML generado');
 
-    // API key de Resend
-    const resendApiKey = 're_9wyxNPLr_MkUGncB18qwELyAJsZhUxZeJ';
+    // API key de Resend desde variables de entorno
+    const resendApiKey = process.env.RESEND_API_KEY;
+    const emailFrom = process.env.EMAIL_FROM || 'Perimetral Tandil <onboarding@resend.dev>';
+    const emailTo = process.env.EMAIL_TO || 'perimetralalambrados@gmail.com';
+    
+    if (!resendApiKey) {
+      console.error('❌ RESEND_API_KEY no configurada');
+      return res.status(500).json({
+        success: false,
+        error: 'Configuración de email no disponible'
+      });
+    }
+    
     console.log('🔑 API Key configurada');
+    console.log('📧 Email destino:', emailTo);
     
     // Configurar payload para Resend
     const payload = {
-      from: 'Perimetral Tandil <onboarding@resend.dev>',
-      to: ['kevinem-14@hotmail.com'],
+      from: emailFrom,
+      to: [emailTo],
       reply_to: email,
       subject: `Nueva consulta: ${producto.nombre}`,
       html: htmlContent
