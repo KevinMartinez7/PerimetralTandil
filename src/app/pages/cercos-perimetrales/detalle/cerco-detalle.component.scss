@@ -993,3 +993,350 @@
     border: 2px solid rgba(252, 211, 77, 0.4);
   }
 }
+
+/* === POPUP DE ÉXITO === */
+.popup-exito-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10003;
+  animation: popupFadeIn 0.3s ease-out;
+  backdrop-filter: blur(10px);
+}
+
+@keyframes popupFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.popup-exito-container {
+  position: relative;
+  background: #000000;
+  border-radius: 24px;
+  box-shadow: 0 25px 70px rgba(220, 38, 38, 0.4),
+              0 0 0 3px #FCD34D,
+              0 0 0 6px #DC2626;
+  max-width: 520px;
+  width: 90%;
+  margin: 1rem;
+  animation: popupSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background: linear-gradient(90deg, #FCD34D 0%, #DC2626 25%, #FCD34D 50%, #DC2626 75%, #FCD34D 100%);
+    background-size: 200% 100%;
+    animation: gradientShift 2s ease infinite;
+  }
+}
+
+@keyframes popupSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.popup-close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 40px;
+  height: 40px;
+  background: rgba(252, 211, 77, 0.15);
+  border: 2px solid #FCD34D;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10;
+  
+  svg {
+    width: 22px;
+    height: 22px;
+    color: #FCD34D;
+    transition: all 0.3s ease;
+  }
+  
+  &:hover {
+    background: #DC2626;
+    border-color: #DC2626;
+    transform: rotate(90deg) scale(1.1);
+    
+    svg {
+      color: #FCD34D;
+    }
+  }
+}
+
+.popup-exito-content {
+  padding: 3rem 2rem 2rem;
+  text-align: center;
+}
+
+.popup-exito-icono {
+  margin: 0 auto 2rem;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkmark {
+  width: 100px;
+  height: 100px;
+  display: block;
+  stroke-width: 3;
+  stroke: #DC2626;
+  stroke-miterlimit: 10;
+  
+  &-circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke-width: 3;
+    stroke: #FCD34D;
+    fill: none;
+    animation: checkmarkCircle 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+  }
+  
+  &-check {
+    transform-origin: 50% 50%;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    stroke-width: 4;
+    stroke: #DC2626;
+    animation: checkmarkCheck 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.5s forwards;
+  }
+}
+
+@keyframes checkmarkCircle {
+  0% {
+    stroke-dashoffset: 166;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes checkmarkCheck {
+  0% {
+    stroke-dashoffset: 48;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.popup-exito-texto {
+  margin-bottom: 2rem;
+  
+  h2 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #FCD34D;
+    margin: 0 0 1rem 0;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 4px rgba(220, 38, 38, 0.3);
+  }
+  
+  p {
+    font-size: 1.15rem;
+    color: #ffffff;
+    margin: 0.5rem 0;
+    line-height: 1.6;
+    font-weight: 500;
+  }
+  
+  .popup-subtexto {
+    font-size: 1rem;
+    color: #FCD34D;
+    font-style: italic;
+    font-weight: 400;
+  }
+}
+
+.popup-info-contacto {
+  background: linear-gradient(135deg, #DC2626 0%, #991b1b 100%);
+  border: 3px solid #FCD34D;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 15px rgba(252, 211, 77, 0.3),
+              inset 0 1px 0 rgba(252, 211, 77, 0.2);
+  
+  .contacto-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    
+    &:not(:last-child) {
+      border-bottom: 2px solid rgba(252, 211, 77, 0.3);
+    }
+    
+    svg {
+      width: 24px;
+      height: 24px;
+      color: #FCD34D;
+      flex-shrink: 0;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    }
+    
+    span {
+      font-size: 1rem;
+      color: #ffffff;
+      font-weight: 600;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+  }
+}
+
+.popup-btn-cerrar {
+  width: 100%;
+  padding: 1.125rem 2rem;
+  background: linear-gradient(135deg, #FCD34D 0%, #fbbf24 100%);
+  color: #000000;
+  border: 3px solid #000000;
+  border-radius: 14px;
+  font-size: 1.2rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(252, 211, 77, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  
+  &:hover {
+    background: linear-gradient(135deg, #DC2626 0%, #b91c1c 100%);
+    color: #FCD34D;
+    border-color: #FCD34D;
+    box-shadow: 0 8px 25px rgba(220, 38, 38, 0.5),
+                0 0 30px rgba(252, 211, 77, 0.3);
+    transform: translateY(-3px) scale(1.02);
+  }
+  
+  &:active {
+    transform: translateY(-1px) scale(1);
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+  }
+}
+
+/* Responsive para popup */
+@media (max-width: 768px) {
+  .popup-exito-container {
+    max-width: 95%;
+    margin: 0.5rem;
+  }
+  
+  .popup-exito-content {
+    padding: 2.5rem 1.5rem 1.5rem;
+  }
+  
+  .popup-exito-icono {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 1.5rem;
+    
+    .checkmark {
+      width: 80px;
+      height: 80px;
+    }
+  }
+  
+  .popup-exito-texto {
+    h2 {
+      font-size: 1.5rem;
+    }
+    
+    p {
+      font-size: 1rem;
+    }
+    
+    .popup-subtexto {
+      font-size: 0.9rem;
+    }
+  }
+  
+  .popup-info-contacto {
+    padding: 1rem;
+    
+    .contacto-item {
+      padding: 0.5rem 0;
+      
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+      
+      span {
+        font-size: 0.85rem;
+      }
+    }
+  }
+  
+  .popup-btn-cerrar {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .popup-exito-texto {
+    h2 {
+      font-size: 1.35rem;
+    }
+    
+    p {
+      font-size: 0.95rem;
+    }
+  }
+  
+  .popup-info-contacto {
+    .contacto-item {
+      flex-direction: column;
+      gap: 0.5rem;
+      text-align: center;
+      
+      span {
+        font-size: 0.8rem;
+      }
+    }
+  }
+}

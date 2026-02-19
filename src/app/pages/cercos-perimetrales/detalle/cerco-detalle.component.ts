@@ -37,6 +37,9 @@ export class CercoDetalleComponent implements OnInit, OnDestroy {
   enviandoEmail: boolean = false;
   mensajeRespuesta: string = '';
   
+  // Control del popup de éxito
+  mostrarPopupExito: boolean = false;
+  
   // Control del modal de imagen ampliada
   mostrarImagenAmpliada: boolean = false;
   imagenAmpliadaUrl: string = '';
@@ -421,10 +424,25 @@ export class CercoDetalleComponent implements OnInit, OnDestroy {
       });
 
       if (resultado.success) {
-        this.mensajeRespuesta = '✅ ¡Consulta enviada exitosamente! Nos pondremos en contacto contigo pronto.';
+        console.log('✅ Email enviado exitosamente!');
+        console.log('🎉 Mostrando popup de éxito...');
+        
+        // Mostrar el popup INMEDIATAMENTE
+        this.mostrarPopupExito = true;
+        
+        // Cerrar el formulario después de mostrar el popup
+        this.cerrarFormulario();
+        
+        console.log('🟢 Estado del popup:', this.mostrarPopupExito);
+        
+        // Forzar detección de cambios
+        this.cdr.detectChanges();
+        
+        // Cerrar el popup automáticamente después de 7 segundos
         setTimeout(() => {
-          this.cerrarFormulario();
-        }, 3000);
+          console.log('🕒 Auto-cerrando popup...');
+          this.cerrarPopupExito();
+        }, 7000);
       } else {
         this.mensajeRespuesta = '❌ Error al enviar la consulta: ' + (resultado.error || 'Error desconocido');
       }
@@ -434,6 +452,12 @@ export class CercoDetalleComponent implements OnInit, OnDestroy {
     } finally {
       this.enviandoEmail = false;
     }
+  }
+
+  cerrarPopupExito() {
+    console.log('❌ Cerrando popup de éxito');
+    this.mostrarPopupExito = false;
+    this.cdr.detectChanges();
   }
 
   formatearPrecio(precio: number): string {

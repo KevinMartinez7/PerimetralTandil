@@ -424,14 +424,25 @@ export class ArticuloDetalleComponent implements OnInit, OnDestroy {
       });
 
       if (resultado.success) {
-        // Cerrar el formulario y mostrar popup de éxito
-        this.cerrarFormulario();
+        console.log('✅ Email enviado exitosamente!');
+        console.log('🎉 Mostrando popup de éxito...');
+        
+        // Mostrar el popup INMEDIATAMENTE
         this.mostrarPopupExito = true;
         
-        // Cerrar el popup automáticamente después de 5 segundos
+        // Cerrar el formulario después de mostrar el popup
+        this.cerrarFormulario();
+        
+        console.log('🟢 Estado del popup:', this.mostrarPopupExito);
+        
+        // Forzar detección de cambios
+        this.cdr.detectChanges();
+        
+        // Cerrar el popup automáticamente después de 7 segundos
         setTimeout(() => {
+          console.log('🕒 Auto-cerrando popup...');
           this.cerrarPopupExito();
-        }, 5000);
+        }, 7000);
       } else {
         this.mensajeRespuesta = '❌ Error al enviar la consulta: ' + (resultado.error || 'Error desconocido');
       }
@@ -444,7 +455,9 @@ export class ArticuloDetalleComponent implements OnInit, OnDestroy {
   }
 
   cerrarPopupExito() {
+    console.log('❌ Cerrando popup de éxito');
     this.mostrarPopupExito = false;
+    this.cdr.detectChanges();
   }
 
   formatearPrecio(precio: number): string {
