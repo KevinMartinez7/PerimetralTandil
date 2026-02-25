@@ -296,7 +296,7 @@ export class CercosPerimetralesComponent implements OnInit {
 
   contactarPorArticulo(articulo: CercoPerimetral) {
     const mensaje = `Hola! Me interesa el producto: ${articulo.nombre}`;
-    const url = `https://wa.me/542494550000?text=${encodeURIComponent(mensaje)}`;
+    const url = `https://wa.me/2494316864?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
   }
 
